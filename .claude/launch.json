@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "qinghe",
+      "runtimeExecutable": ".venv/bin/python",
+      "runtimeArgs": ["main.py", "--serve"],
+      "port": 4173
+    }
+  ]
+}

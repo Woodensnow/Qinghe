@@ -1,0 +1,25 @@
+{
+  "torchVersion": "2.15.0",
+  "threads": 2,
+  "graphTravelers": 64,
+  "graphGuides": 48,
+  "scoredPairs": 295,
+  "scope": "warm in-process CPU forward only; excludes graph construction, loading and HTTP",
+  "results": {
+    "v1": {
+      "medianMs": 24.639416500576772,
+      "maxMs": 25.319416999991518,
+      "iterations": 20
+    },
+    "v3": {
+      "medianMs": 66.33639649953693,
+      "maxMs": 69.34145800187252,
+      "iterations": 20
+    },
+    "v4": {
+      "medianMs": 111.82291649856779,
+      "maxMs": 113.46170800243272,
+      "iterations": 20
+    }
+  }
+}

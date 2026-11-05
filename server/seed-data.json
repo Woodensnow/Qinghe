@@ -1,0 +1,935 @@
+{
+  "version": 1,
+  "users": [
+    {
+      "id": "u_demo",
+      "name": "小禾",
+      "email": "demo@qinghe.cn",
+      "passwordHash": "1d0bba5db4a0d08b0c6cc316c318c045164ab419bd6bd8f3c5d5e89e2644c7de3312d611b931b856b872a84467af391c61dfbca91bb91e2a59d58d47b0e15f9f",
+      "salt": "3340d1ef4d355fe1aa816db3bd8dfee0",
+      "city": "上海",
+      "avatarTone": "sage",
+      "avatarUrl": "",
+      "coverUrl": "/assets/images/hero-shanghai.jpg",
+      "bio": "白天是广告人，晚上是城市散步爱好者。喜欢咖啡、旧书店和没有目的地的路。",
+      "photos": [
+        "/assets/images/gallery-cafe.jpg",
+        "/assets/images/gallery-tea.jpg",
+        "/assets/images/gallery-camera.jpg"
+      ],
+      "joinedAt": "2026-08-16T10:00:00.000Z"
+    }
+  ],
+  "sessions": [],
+  "guides": [
+    {
+      "id": "g_linxiaoman",
+      "ownerId": null,
+      "name": "林小满",
+      "city": "上海",
+      "headline": "像本地朋友一样，带你钻进梧桐区的小马路",
+      "bio": "土生土长的上海小囡，在武康路附近长大。比起赶景点，我更喜欢带你从一杯咖啡开始，慢慢走进弄堂、菜场和旧公寓的故事里。\n\n做过 5 年品牌活动策划，路线规划是我的强项，也很会帮朋友拍自然的旅行照。不赶时间、不进购物店，两个人也能玩得像一次小型私奔。",
+      "cover": "/assets/images/guide-shanghai.jpg",
+      "gallery": [
+        "/assets/images/guide-shanghai.jpg",
+        "/assets/images/gallery-cafe.jpg",
+        "/assets/images/gallery-camera.jpg"
+      ],
+      "avatarTone": "sage",
+      "verified": true,
+      "featured": true,
+      "rating": 4.9,
+      "reviewCount": 126,
+      "orders": 186,
+      "responseTime": "30 分钟内回复",
+      "responseRate": "99%",
+      "languages": [
+        "中文",
+        "英语",
+        "上海话"
+      ],
+      "services": [
+        "城市漫步",
+        "美食探店",
+        "拍照陪游"
+      ],
+      "tags": [
+        "梧桐区",
+        "咖啡地图",
+        "会拍照"
+      ],
+      "highlights": [
+        "不走回头路的梧桐区私藏路线",
+        "本地人才知道的小馆子",
+        "全程帮你拍自然感旅行照"
+      ],
+      "idealFor": [
+        "第一次来上海",
+        "闺蜜 / 情侣出行",
+        "不想做攻略的懒人"
+      ],
+      "price": 268,
+      "packages": [
+        {
+          "id": "p_lin_1",
+          "name": "半日城市漫步",
+          "duration": "4 小时",
+          "price": 268,
+          "description": "武康路—安福路—五原路，咖啡、老洋房和弄堂里的日常。",
+          "includes": [
+            "一对一专属路线",
+            "沿途故事讲解",
+            "旅行照拍摄"
+          ]
+        },
+        {
+          "id": "p_lin_2",
+          "name": "全天深度陪游",
+          "duration": "8 小时",
+          "price": 468,
+          "description": "从早餐到夜景，把上海的老城厢和西区串成完整一天。",
+          "includes": [
+            "全天行程定制",
+            "本帮菜馆预订",
+            "旅行照拍摄",
+            "途中茶水"
+          ]
+        },
+        {
+          "id": "p_lin_3",
+          "name": "接机 + 城市初体验",
+          "duration": "4 小时",
+          "price": 368,
+          "description": "机场接到你，安顿好行李后先逛一圈，快速找到城市手感。",
+          "includes": [
+            "机场接送",
+            "酒店协助入住",
+            "周边散步路线"
+          ]
+        }
+      ],
+      "reviews": [
+        {
+          "id": "r_lin_1",
+          "author": "Momo",
+          "avatarTone": "clay",
+          "rating": 5,
+          "date": "2026-10-18",
+          "packageName": "半日城市漫步",
+          "content": "小满带我们钻了好几条地图上找不到的小弄堂，还在一个老爷爷开的裁缝铺门口聊了半小时。照片也拍得特别自然，不是那种打卡游客照。"
+        },
+        {
+          "id": "r_lin_2",
+          "author": "一颗青柠",
+          "avatarTone": "sky",
+          "rating": 5,
+          "date": "2026-10-02",
+          "packageName": "半日城市漫步",
+          "content": "第一次一个人来上海，本来有点紧张。小满很会照顾节奏，推荐的小馄饨店我现在还在想念。下次带爸妈来还找她。"
+        },
+        {
+          "id": "r_lin_3",
+          "author": "阿北",
+          "avatarTone": "sand",
+          "rating": 5,
+          "date": "2026-09-21",
+          "packageName": "全天深度陪游",
+          "content": "行程松紧刚好，走累了随时能拐进咖啡馆。全天下来完全不觉得是在“被导游”，更像一个很懂上海的朋友陪你玩。"
+        }
+      ],
+      "createdAt": "2026-03-12T09:00:00.000Z",
+      "status": "published"
+    },
+    {
+      "id": "g_chenyu",
+      "ownerId": null,
+      "name": "陈屿",
+      "city": "北京",
+      "headline": "胡同里长大的北京爷们，讲得出城墙根下的故事",
+      "bio": "出生在东城，小时候在胡同里追鸽子长大。大学学的是历史，现在做独立摄影师，带过一百多位第一次来北京的朋友。\n\n我擅长避开人潮，把故宫、景山和胡同串成一条有呼吸感的路线。也会在合适的时间，带你去城墙根看一场不被打扰的日落。",
+      "cover": "/assets/images/guide-beijing.jpg",
+      "gallery": [
+        "/assets/images/guide-beijing.jpg",
+        "/assets/images/gallery-camera.jpg",
+        "/assets/images/gallery-map.jpg"
+      ],
+      "avatarTone": "moss",
+      "verified": true,
+      "featured": true,
+      "rating": 4.9,
+      "reviewCount": 98,
+      "orders": 132,
+      "responseTime": "1 小时内回复",
+      "responseRate": "98%",
+      "languages": [
+        "中文",
+        "英语"
+      ],
+      "services": [
+        "城市漫步",
+        "接送陪同",
+        "拍照陪游"
+      ],
+      "tags": [
+        "胡同路线",
+        "历史故事",
+        "会摄影"
+      ],
+      "highlights": [
+        "避开人潮的胡同散步路线",
+        "把历史讲成有画面的故事",
+        "可提供跟拍与精修"
+      ],
+      "idealFor": [
+        "历史爱好者",
+        "亲子家庭",
+        "想拍好照片的旅人"
+      ],
+      "price": 298,
+      "packages": [
+        {
+          "id": "p_chen_1",
+          "name": "胡同半日漫步",
+          "duration": "4 小时",
+          "price": 298,
+          "description": "东四—雍和宫—五道营，从王府旧事走到今天的生活。",
+          "includes": [
+            "胡同路线讲解",
+            "小众拍照点",
+            "老北京茶歇"
+          ]
+        },
+        {
+          "id": "p_chen_2",
+          "name": "长城一日往返",
+          "duration": "9 小时",
+          "price": 528,
+          "description": "避开八达岭人流，走一段更安静的野长城与山谷。",
+          "includes": [
+            "往返交通",
+            "路线与安全讲解",
+            "随行摄影"
+          ]
+        },
+        {
+          "id": "p_chen_3",
+          "name": "接站 + 入住安顿",
+          "duration": "3 小时",
+          "price": 328,
+          "description": "高铁站或机场接到你，送到酒店，再顺手逛一圈周边。",
+          "includes": [
+            "接站服务",
+            "入住协助",
+            "周边生活指南"
+          ]
+        }
+      ],
+      "reviews": [
+        {
+          "id": "r_chen_1",
+          "author": "Rita",
+          "avatarTone": "sage",
+          "rating": 5,
+          "date": "2026-10-12",
+          "packageName": "胡同半日漫步",
+          "content": "陈屿讲历史真的有一手，不是背年份，而是讲人怎么生活。他带我们在胡同口吃了一家炸酱面，比任何攻略都地道。"
+        },
+        {
+          "id": "r_chen_2",
+          "author": "大川",
+          "avatarTone": "sky",
+          "rating": 5,
+          "date": "2026-09-28",
+          "packageName": "长城一日往返",
+          "content": "长城那天天气一般，但他临时调整了路线，反而避开了全部旅行团。回程车上还帮我们修了图，太值了。"
+        },
+        {
+          "id": "r_chen_3",
+          "author": "栗子",
+          "avatarTone": "plum",
+          "rating": 4,
+          "date": "2026-09-10",
+          "packageName": "胡同半日漫步",
+          "content": "路线很好，讲解也有意思，就是四小时有点不够逛。下次准备直接约全天。"
+        }
+      ],
+      "createdAt": "2026-02-18T09:00:00.000Z",
+      "status": "published"
+    },
+    {
+      "id": "g_ali",
+      "ownerId": null,
+      "name": "阿梨",
+      "city": "成都",
+      "headline": "带你吃遍本地人排队的苍蝇馆子，顺便喝碗盖碗茶",
+      "bio": "在成都读了四年大学，又留下来工作了六年，对这座城市的理解基本都长在胃里。从建设路的小吃到玉林路的深夜串串，我能按你的口味排出一条不踩雷的路线。\n\n不只会吃，也会带你找个河边茶馆坐一下午，看看成都人是怎么把日子过慢的。",
+      "cover": "/assets/images/guide-chengdu.jpg",
+      "gallery": [
+        "/assets/images/guide-chengdu.jpg",
+        "/assets/images/gallery-tea.jpg",
+        "/assets/images/gallery-cafe.jpg"
+      ],
+      "avatarTone": "clay",
+      "verified": true,
+      "featured": true,
+      "rating": 5,
+      "reviewCount": 77,
+      "orders": 91,
+      "responseTime": "20 分钟内回复",
+      "responseRate": "100%",
+      "languages": [
+        "中文",
+        "四川话",
+        "英语"
+      ],
+      "services": [
+        "美食探店",
+        "城市漫步",
+        "亲子出行"
+      ],
+      "tags": [
+        "本地吃货",
+        "苍蝇馆子",
+        "慢生活"
+      ],
+      "highlights": [
+        "按口味定制的觅食路线",
+        "本地人常去的老茶馆",
+        "会提前排号不让你干等"
+      ],
+      "idealFor": [
+        "吃货搭子",
+        "周末短途",
+        "带爸妈慢游"
+      ],
+      "price": 228,
+      "packages": [
+        {
+          "id": "p_ali_1",
+          "name": "市井美食半日",
+          "duration": "4 小时",
+          "price": 228,
+          "description": "从一碗甜水面开始，穿过菜市场，最后在茶馆里消食。",
+          "includes": [
+            "4–5 家本地小馆",
+            "口味偏好定制",
+            "茶馆茶位"
+          ]
+        },
+        {
+          "id": "p_ali_2",
+          "name": "熊猫基地 + 老街一日",
+          "duration": "8 小时",
+          "price": 398,
+          "description": "早上去看熊猫吃早饭，下午回城里慢慢逛老街和菜市场。",
+          "includes": [
+            "往返交通",
+            "门票预约协助",
+            "本地午餐"
+          ]
+        },
+        {
+          "id": "p_ali_3",
+          "name": "夜宵散步局",
+          "duration": "3 小时",
+          "price": 188,
+          "description": "玉林路的串串、蛋烘糕和深夜豆浆，成都的夜才刚开始。",
+          "includes": [
+            "夜宵路线",
+            "3–4 家小店",
+            "全程陪逛"
+          ]
+        }
+      ],
+      "reviews": [
+        {
+          "id": "r_ali_1",
+          "author": "桃桃",
+          "avatarTone": "sand",
+          "rating": 5,
+          "date": "2026-10-20",
+          "packageName": "市井美食半日",
+          "content": "阿梨太会点了！我们四个人全程没踩雷，连我不吃辣都照顾到了。菜市场那一段特别喜欢，像真的在成都生活了半天。"
+        },
+        {
+          "id": "r_ali_2",
+          "author": "老周",
+          "avatarTone": "moss",
+          "rating": 5,
+          "date": "2026-10-05",
+          "packageName": "熊猫基地 + 老街一日",
+          "content": "带女儿来的，阿梨很有耐心，路线也不赶。熊猫基地她一早就去帮我们占了好位置，体验感拉满。"
+        },
+        {
+          "id": "r_ali_3",
+          "author": "Kiki",
+          "avatarTone": "plum",
+          "rating": 5,
+          "date": "2026-09-16",
+          "packageName": "夜宵散步局",
+          "content": "三个小时吃了五顿，成都的夜晚太快乐了。她会讲每家店的故事，不是那种流水线打卡。"
+        }
+      ],
+      "createdAt": "2026-04-02T09:00:00.000Z",
+      "status": "published"
+    },
+    {
+      "id": "g_zhouye",
+      "ownerId": null,
+      "name": "周野",
+      "city": "西安",
+      "headline": "城墙根下骑过三百圈，给你讲不一样的十三朝",
+      "bio": "西安本地人，骑行和纪录片拍摄爱好者。比起教科书式的讲解，我更喜欢带你看城墙砖缝里的名字、回民街后面的老院子，还有傍晚亮灯那一瞬间的长安。\n\n可以帮你把兵马俑、城墙和市区路线排得顺顺当当，少排队，也少走冤枉路。",
+      "cover": "/assets/images/guide-xian.jpg",
+      "gallery": [
+        "/assets/images/guide-xian.jpg",
+        "/assets/images/gallery-map.jpg",
+        "/assets/images/gallery-camera.jpg"
+      ],
+      "avatarTone": "sky",
+      "verified": true,
+      "featured": false,
+      "rating": 4.8,
+      "reviewCount": 64,
+      "orders": 78,
+      "responseTime": "1 小时内回复",
+      "responseRate": "96%",
+      "languages": [
+        "中文",
+        "英语"
+      ],
+      "services": [
+        "城市漫步",
+        "接送陪同",
+        "拍照陪游"
+      ],
+      "tags": [
+        "城墙骑行",
+        "历史控",
+        "路线规划"
+      ],
+      "highlights": [
+        "城墙骑行 + 日落机位",
+        "兵马俑错峰路线",
+        "会讲冷门历史细节"
+      ],
+      "idealFor": [
+        "第一次到西安",
+        "历史迷",
+        "喜欢骑行的旅人"
+      ],
+      "price": 258,
+      "packages": [
+        {
+          "id": "p_zhou_1",
+          "name": "城墙 + 回坊半日",
+          "duration": "4 小时",
+          "price": 258,
+          "description": "骑行城墙一圈，再从大皮院一路吃到洒金桥。",
+          "includes": [
+            "城墙自行车租赁",
+            "回坊觅食路线",
+            "历史讲解"
+          ]
+        },
+        {
+          "id": "p_zhou_2",
+          "name": "兵马俑错峰一日",
+          "duration": "8 小时",
+          "price": 498,
+          "description": "早出发避开人流，下午回城看城墙日落。",
+          "includes": [
+            "往返交通",
+            "门票预约协助",
+            "全程讲解"
+          ]
+        },
+        {
+          "id": "p_zhou_3",
+          "name": "夜游长安",
+          "duration": "3 小时",
+          "price": 218,
+          "description": "从永宁门走到钟楼，看灯光亮起后另一面的西安。",
+          "includes": [
+            "夜游路线",
+            "拍照机位",
+            "一杯本地酸梅汤"
+          ]
+        }
+      ],
+      "reviews": [
+        {
+          "id": "r_zhou_1",
+          "author": "十七",
+          "avatarTone": "sage",
+          "rating": 5,
+          "date": "2026-10-08",
+          "packageName": "城墙 + 回坊半日",
+          "content": "周野对西安的历史是真的熟，随口就能讲出一段典故。骑行路线也很舒服，傍晚在城墙上看日落，值回票价。"
+        },
+        {
+          "id": "r_zhou_2",
+          "author": "Yuki",
+          "avatarTone": "clay",
+          "rating": 5,
+          "date": "2026-09-24",
+          "packageName": "兵马俑错峰一日",
+          "content": "早上七点出发的决定太正确了，到兵马俑几乎没排队。讲解比馆里的语音导览有意思多了。"
+        },
+        {
+          "id": "r_zhou_3",
+          "author": "老李",
+          "avatarTone": "moss",
+          "rating": 4,
+          "date": "2026-09-02",
+          "packageName": "夜游长安",
+          "content": "路线安排不错，就是国庆前人有点多。周野很负责，一直帮我们找拍照的位置。"
+        }
+      ],
+      "createdAt": "2026-05-11T09:00:00.000Z",
+      "status": "published"
+    },
+    {
+      "id": "g_suqing",
+      "ownerId": null,
+      "name": "苏晴",
+      "city": "杭州",
+      "headline": "西湖边长大，擅长把周末过成一首慢诗",
+      "bio": "在杭州生活了二十多年，西湖边的每条小路都走过很多遍。喜欢茶山、旧书店和不那么拥挤的湖边。\n\n带娃经验丰富，也很会拍温柔的自然系照片。如果你不想在断桥上人挤人，我可以带你去另一面的西湖。",
+      "cover": "/assets/images/guide-hangzhou.jpg",
+      "gallery": [
+        "/assets/images/guide-hangzhou.jpg",
+        "/assets/images/gallery-tea.jpg",
+        "/assets/images/gallery-cafe.jpg"
+      ],
+      "avatarTone": "plum",
+      "verified": true,
+      "featured": true,
+      "rating": 4.9,
+      "reviewCount": 152,
+      "orders": 203,
+      "responseTime": "15 分钟内回复",
+      "responseRate": "100%",
+      "languages": [
+        "中文",
+        "英语",
+        "日语"
+      ],
+      "services": [
+        "亲子出行",
+        "城市漫步",
+        "拍照陪游"
+      ],
+      "tags": [
+        "西湖秘境",
+        "亲子友好",
+        "茶山"
+      ],
+      "highlights": [
+        "避开人潮的西湖西线",
+        "适合小朋友的自然路线",
+        "温柔胶片感跟拍"
+      ],
+      "idealFor": [
+        "亲子家庭",
+        "闺蜜出游",
+        "喜欢安静的人"
+      ],
+      "price": 318,
+      "packages": [
+        {
+          "id": "p_su_1",
+          "name": "西湖西线慢行",
+          "duration": "4 小时",
+          "price": 318,
+          "description": "茅家埠—乌龟潭—浴鹄湾，走游客最少的那一面西湖。",
+          "includes": [
+            "小众路线",
+            "沿途讲解",
+            "自然系跟拍"
+          ]
+        },
+        {
+          "id": "p_su_2",
+          "name": "龙井茶山一日",
+          "duration": "8 小时",
+          "price": 568,
+          "description": "从茶园徒步到农家午饭，再泡一壶当季龙井。",
+          "includes": [
+            "茶山路线",
+            "农家午餐",
+            "茶席体验",
+            "跟拍"
+          ]
+        },
+        {
+          "id": "p_su_3",
+          "name": "亲子自然半日",
+          "duration": "4 小时",
+          "price": 358,
+          "description": "适合 3–10 岁小朋友，边走边玩的自然观察路线。",
+          "includes": [
+            "儿童友好路线",
+            "自然小任务",
+            "亲子合影"
+          ]
+        }
+      ],
+      "reviews": [
+        {
+          "id": "r_su_1",
+          "author": "团团妈",
+          "avatarTone": "sand",
+          "rating": 5,
+          "date": "2026-10-22",
+          "packageName": "亲子自然半日",
+          "content": "苏晴真的很会带小朋友，一路上准备了小任务卡，孩子完全没喊累。路线也很安全，湖边人少景美。"
+        },
+        {
+          "id": "r_su_2",
+          "author": "Echo",
+          "avatarTone": "sky",
+          "rating": 5,
+          "date": "2026-10-01",
+          "packageName": "西湖西线慢行",
+          "content": "国庆的西湖居然还能这么安静，太惊喜了。她带的那条线几乎没有游客，拍出来的照片像电影截图。"
+        },
+        {
+          "id": "r_su_3",
+          "author": "小满",
+          "avatarTone": "sage",
+          "rating": 5,
+          "date": "2026-09-18",
+          "packageName": "龙井茶山一日",
+          "content": "茶山徒步强度刚好，午饭的农家菜特别香。苏晴讲话轻轻的，整个节奏都很治愈。"
+        }
+      ],
+      "createdAt": "2026-01-20T09:00:00.000Z",
+      "status": "published"
+    },
+    {
+      "id": "g_guyan",
+      "ownerId": null,
+      "name": "顾言",
+      "city": "广州",
+      "headline": "一盅两件开局，带你从骑楼走到珠江边",
+      "bio": "广州土著，媒体从业者，业余时间都在老城区晃荡。早茶、骑楼、凉茶铺和珠江夜风，是我认为认识广州最好的方式。\n\n可以讲粤语，也能用普通话和英语交流。路线会按你的体力调整，不赶场，重点是把老广的生活气递给你。",
+      "cover": "/assets/images/guide-guangzhou.jpg",
+      "gallery": [
+        "/assets/images/guide-guangzhou.jpg",
+        "/assets/images/gallery-cafe.jpg",
+        "/assets/images/gallery-tea.jpg"
+      ],
+      "avatarTone": "sand",
+      "verified": true,
+      "featured": false,
+      "rating": 4.8,
+      "reviewCount": 45,
+      "orders": 58,
+      "responseTime": "2 小时内回复",
+      "responseRate": "95%",
+      "languages": [
+        "中文",
+        "粤语",
+        "英语"
+      ],
+      "services": [
+        "美食探店",
+        "城市漫步",
+        "接送陪同"
+      ],
+      "tags": [
+        "老广味道",
+        "骑楼",
+        "珠江夜游"
+      ],
+      "highlights": [
+        "本地人排队的早茶店",
+        "西关骑楼故事",
+        "珠江边小众夜景"
+      ],
+      "idealFor": [
+        "广府文化爱好者",
+        "吃货",
+        "商务差旅加游"
+      ],
+      "price": 218,
+      "packages": [
+        {
+          "id": "p_gu_1",
+          "name": "西关寻味半日",
+          "duration": "4 小时",
+          "price": 218,
+          "description": "早茶开场，穿过恩宁路骑楼，再吃一碗地道云吞面。",
+          "includes": [
+            "早茶排号",
+            "西关路线",
+            "3 家老字号"
+          ]
+        },
+        {
+          "id": "p_gu_2",
+          "name": "珠江夜游 + 宵夜",
+          "duration": "4 小时",
+          "price": 288,
+          "description": "从沙面走到江边，看两岸亮灯，最后钻进深夜大排档。",
+          "includes": [
+            "江边路线",
+            "夜游船票协助",
+            "宵夜推荐"
+          ]
+        },
+        {
+          "id": "p_gu_3",
+          "name": "广州一日精华",
+          "duration": "8 小时",
+          "price": 468,
+          "description": "早茶、陈家祠、沙面、珠江，一天读懂老广与新广州。",
+          "includes": [
+            "全天路线",
+            "景点预约协助",
+            "本地交通指引"
+          ]
+        }
+      ],
+      "reviews": [
+        {
+          "id": "r_gu_1",
+          "author": "森森",
+          "avatarTone": "clay",
+          "rating": 5,
+          "date": "2026-10-16",
+          "packageName": "西关寻味半日",
+          "content": "顾言带我们去的那家早茶真的绝了，全是本地阿公阿婆。一路讲骑楼和西关大屋的故事，比走马观花有意思太多。"
+        },
+        {
+          "id": "r_gu_2",
+          "author": "安宁",
+          "avatarTone": "plum",
+          "rating": 4,
+          "date": "2026-09-30",
+          "packageName": "广州一日精华",
+          "content": "一天下来很充实，路线安排合理。就是广州太热了，建议夏天来的朋友带好防晒。"
+        },
+        {
+          "id": "r_gu_3",
+          "author": "Mark",
+          "avatarTone": "sky",
+          "rating": 5,
+          "date": "2026-09-08",
+          "packageName": "珠江夜游 + 宵夜",
+          "content": "Great local experience! Gu Yan knows every little alley and the night view was stunning. Highly recommended."
+        }
+      ],
+      "createdAt": "2026-06-08T09:00:00.000Z",
+      "status": "published"
+    },
+    {
+      "id": "g_demo_xiaohe",
+      "ownerId": "u_demo",
+      "name": "小禾",
+      "city": "上海",
+      "headline": "下班后的城市散步，带你走一条没有目的地的路",
+      "bio": "白天在广告公司上班，晚上和周末喜欢在城市里乱走。没有固定的“必去清单”，但知道哪条弄堂傍晚的光最好、哪家小馆子不用排队。\n\n如果你也喜欢不赶路的旅行，我们可以从一杯咖啡开始，走到菜市场收摊，再找个小酒馆坐下。适合一个人来出差，或者只是想换个节奏过周末的你。",
+      "cover": "/assets/images/guide-shanghai.jpg",
+      "gallery": [
+        "/assets/images/guide-shanghai.jpg",
+        "/assets/images/gallery-cafe.jpg",
+        "/assets/images/gallery-tea.jpg"
+      ],
+      "avatarTone": "sage",
+      "verified": false,
+      "featured": false,
+      "rating": 5,
+      "reviewCount": 0,
+      "orders": 0,
+      "responseTime": "新入驻 · 24 小时内回复",
+      "responseRate": "新入驻",
+      "languages": [
+        "中文",
+        "英语"
+      ],
+      "services": [
+        "城市漫步",
+        "美食探店"
+      ],
+      "tags": [
+        "下班散步",
+        "咖啡地图",
+        "不赶路"
+      ],
+      "highlights": [
+        "避开游客的傍晚散步路线",
+        "本地人才会拐进去的小馆子",
+        "愿意听你讲今天发生的事"
+      ],
+      "idealFor": [
+        "一个人出差",
+        "想放空的周末",
+        "咖啡爱好者"
+      ],
+      "price": 228,
+      "packages": [
+        {
+          "id": "p_demo_1",
+          "name": "下班后散步",
+          "duration": "3 小时",
+          "price": 228,
+          "description": "从静安寺走到愚园路，路过几家有意思的小店，最后找地方吃点东西。",
+          "includes": [
+            "一对一路线",
+            "沿途聊天",
+            "本地小店推荐"
+          ]
+        },
+        {
+          "id": "p_demo_2",
+          "name": "周末半日慢游",
+          "duration": "5 小时",
+          "price": 328,
+          "description": "咖啡、菜市场、旧书店和一条没有游客的马路。",
+          "includes": [
+            "路线定制",
+            "咖啡一杯",
+            "拍照协助"
+          ]
+        },
+        {
+          "id": "p_demo_3",
+          "name": "深夜食堂局",
+          "duration": "3 小时",
+          "price": 268,
+          "description": "晚上八点以后才开门的店，和这座城市放松下来的样子。",
+          "includes": [
+            "夜宵路线",
+            "3 家小店",
+            "全程陪同"
+          ]
+        }
+      ],
+      "reviews": [],
+      "createdAt": "2026-10-23T16:02:47.325Z",
+      "status": "paused"
+    }
+  ],
+  "bookings": [
+    {
+      "id": "b_demo_upcoming",
+      "userId": "u_demo",
+      "guideId": "g_linxiaoman",
+      "guideName": "林小满",
+      "guideCity": "上海",
+      "guideCover": "/assets/images/guide-shanghai.jpg",
+      "packageId": "p_lin_1",
+      "packageName": "半日城市漫步",
+      "packageDuration": "4 小时",
+      "date": "2026-11-12",
+      "time": "10:00",
+      "people": 2,
+      "extraPeopleFee": 0,
+      "note": "想去武康路和安福路，顺便拍一些自然感的照片。",
+      "total": 268,
+      "status": "confirmed",
+      "createdAt": "2026-11-02T16:02:47.326Z"
+    },
+    {
+      "id": "b_demo_completed",
+      "userId": "u_demo",
+      "guideId": "g_suqing",
+      "guideName": "苏晴",
+      "guideCity": "杭州",
+      "guideCover": "/assets/images/guide-hangzhou.jpg",
+      "packageId": "p_su_1",
+      "packageName": "西湖西线慢行",
+      "packageDuration": "4 小时",
+      "date": "2026-10-18",
+      "time": "14:00",
+      "people": 2,
+      "extraPeopleFee": 0,
+      "note": "",
+      "total": 318,
+      "status": "completed",
+      "createdAt": "2026-10-09T16:02:47.326Z"
+    }
+  ],
+  "conversations": [
+    {
+      "id": "c_demo_lin",
+      "guideId": "g_linxiaoman",
+      "guideName": "林小满",
+      "guideCover": "/assets/images/guide-shanghai.jpg",
+      "guideCity": "上海",
+      "guideAvatarTone": "sage",
+      "guideAvatarUrl": "",
+      "guideOwnerId": null,
+      "travelerId": "u_demo",
+      "travelerName": "小禾",
+      "travelerAvatarTone": "sage",
+      "travelerAvatarUrl": "",
+      "createdAt": "2026-11-01T16:02:47.326Z",
+      "updatedAt": "2026-11-04T15:17:47.326Z",
+      "unreadTraveler": 1,
+      "unreadGuide": 0
+    },
+    {
+      "id": "c_demo_su",
+      "guideId": "g_suqing",
+      "guideName": "苏晴",
+      "guideCover": "/assets/images/guide-hangzhou.jpg",
+      "guideCity": "杭州",
+      "guideAvatarTone": "plum",
+      "guideAvatarUrl": "",
+      "guideOwnerId": null,
+      "travelerId": "u_demo",
+      "travelerName": "小禾",
+      "travelerAvatarTone": "sage",
+      "travelerAvatarUrl": "",
+      "createdAt": "2026-10-23T16:02:47.326Z",
+      "updatedAt": "2026-11-02T16:02:47.326Z",
+      "unreadTraveler": 0,
+      "unreadGuide": 0
+    }
+  ],
+  "messages": [
+    {
+      "id": "m_demo_lin_1",
+      "conversationId": "c_demo_lin",
+      "senderRole": "guide",
+      "senderId": null,
+      "body": "你好呀，我是小满。看到你收藏了武康路那条线，最近是想来上海过周末吗？",
+      "createdAt": "2026-11-01T16:02:47.326Z"
+    },
+    {
+      "id": "m_demo_lin_2",
+      "conversationId": "c_demo_lin",
+      "senderRole": "traveler",
+      "senderId": "u_demo",
+      "body": "对，想找个周六慢慢逛，不想太赶。两个人，可以拍一点照片吗？",
+      "createdAt": "2026-11-02T16:02:47.326Z"
+    },
+    {
+      "id": "m_demo_lin_3",
+      "conversationId": "c_demo_lin",
+      "senderRole": "guide",
+      "senderId": null,
+      "body": "当然可以，我会带一台小相机。那周六下午两点在武康大楼下面见？路线不用提前定死，我们边走边看。",
+      "createdAt": "2026-11-04T15:17:47.326Z"
+    },
+    {
+      "id": "m_demo_su_1",
+      "conversationId": "c_demo_su",
+      "senderRole": "traveler",
+      "senderId": "u_demo",
+      "body": "上次西湖西线太舒服了，下次想带爸妈去，什么时候比较合适？",
+      "createdAt": "2026-11-01T16:02:47.326Z"
+    },
+    {
+      "id": "m_demo_su_2",
+      "conversationId": "c_demo_su",
+      "senderRole": "guide",
+      "senderId": null,
+      "body": "工作日的上午人最少，也凉快。叔叔阿姨如果走得慢，我们就把路线缩短一点，不赶。",
+      "createdAt": "2026-11-02T16:02:47.326Z"
+    }
+  ]
+}

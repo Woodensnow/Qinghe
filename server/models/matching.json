@@ -1,0 +1,139 @@
+{
+  "source": "synthetic-demo",
+  "model": "TinyTransformer-HeteroGNN-v4-ensemble",
+  "dataSeed": 31415,
+  "maxEpochs": 180,
+  "preset": "wide_stable",
+  "encoderLayers": 1,
+  "trainingDevice": "mps",
+  "selection": "v4 (text coverage + unknown-character augmentation): freeze 3 presets x 3 seeds; select ensemble on validation mutual NDCG@5; prospective confirmation after selection",
+  "torchVersion": "2.15.0",
+  "trainActors": {
+    "travelers": 96,
+    "guides": 72
+  },
+  "validationActors": {
+    "travelers": 32,
+    "guides": 24
+  },
+  "trainPairs": 6912,
+  "validationPairs": 768,
+  "validationMetrics": {
+    "mse": 0.1938848029129081,
+    "mae": {
+      "traveler": 0.5244372682257866,
+      "guide": 0.08842886947968509
+    },
+    "eligibleMSE": 0.028273516387738583,
+    "eligibleMAE": {
+      "traveler": 0.16113142838960962,
+      "guide": 0.07377356932133058
+    },
+    "eligiblePairs": 79,
+    "ndcg5": {
+      "traveler": 0.9328316946515374,
+      "guide": 1.0,
+      "mutualTraveler": 0.9929977287927045,
+      "mutualGuide": 0.9926702556365531
+    },
+    "rankQueries": {
+      "traveler": 17,
+      "guide": 22,
+      "mutualTraveler": 17,
+      "mutualGuide": 22
+    }
+  },
+  "syntheticValidationMAE": {
+    "traveler": 0.5244372682257866,
+    "guide": 0.08842886947968509
+  },
+  "constantBaselineMAE": {
+    "traveler": 0.30661155458074063,
+    "guide": 0.22544623313782117
+  },
+  "parameters": 219174,
+  "notice": "合成规则蒸馏；三种子集成与独立模板确认，不代表真实用户接受概率。",
+  "seeds": [
+    42,
+    7,
+    101
+  ],
+  "memberTraining": [
+    {
+      "seed": 42,
+      "bestEpoch": 152,
+      "stoppedEpoch": 172,
+      "parameters": 73058
+    },
+    {
+      "seed": 7,
+      "bestEpoch": 174,
+      "stoppedEpoch": 180,
+      "parameters": 73058
+    },
+    {
+      "seed": 101,
+      "bestEpoch": 178,
+      "stoppedEpoch": 180,
+      "parameters": 73058
+    }
+  ],
+  "members": 3,
+  "confirmationMetrics": {
+    "mse": 0.20000076961224003,
+    "mae": {
+      "traveler": 0.5358326534211907,
+      "guide": 0.08618670674817015
+    },
+    "eligibleMSE": 0.030455307663274925,
+    "eligibleMAE": {
+      "traveler": 0.16619380106360226,
+      "guide": 0.07833528417651936
+    },
+    "eligiblePairs": 295,
+    "ndcg5": {
+      "traveler": 0.9232398747045286,
+      "guide": 0.9983322118521734,
+      "mutualTraveler": 0.9873215124259382,
+      "mutualGuide": 0.9906893363072032
+    },
+    "rankQueries": {
+      "traveler": 55,
+      "guide": 41,
+      "mutualTraveler": 54,
+      "mutualGuide": 41
+    }
+  },
+  "originalConfirmationMetrics": {
+    "mse": 0.11674271321673098,
+    "mae": {
+      "traveler": 0.31946196879562194,
+      "guide": 0.19085517672013452
+    },
+    "eligibleMSE": 0.0679177729630796,
+    "eligibleMAE": {
+      "traveler": 0.1870494751164974,
+      "guide": 0.1771177809521698
+    },
+    "eligiblePairs": 295,
+    "ndcg5": {
+      "traveler": 0.9231149695174741,
+      "guide": 0.9243752331490891,
+      "mutualTraveler": 0.8814424354333568,
+      "mutualGuide": 0.9253175373429272
+    },
+    "rankQueries": {
+      "traveler": 55,
+      "guide": 41,
+      "mutualTraveler": 54,
+      "mutualGuide": 41
+    }
+  },
+  "confirmationActors": {
+    "travelers": 64,
+    "guides": 48,
+    "pairs": 3072,
+    "sha256": "8f3db4cb5af3a8f9b79f96c4ddc8c682c1191a378c4c0214de58f53b545b157c"
+  },
+  "optimizationReport": "docs/matching_refinement_v4_report.json"
+}

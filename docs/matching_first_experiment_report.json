@@ -1,0 +1,432 @@
+{
+  "protocol": "v2: actor/template-held-out; selection by validation MSE only; test after selection",
+  "dataSeed": 31415,
+  "splits": {
+    "train": {
+      "travelers": 96,
+      "guides": 72,
+      "pairs": 6912,
+      "sha256": "a5a98cf97d4b2530d7af6fc4e98626216a59a74b8b764e0ad119cbf03a036793"
+    },
+    "validation": {
+      "travelers": 32,
+      "guides": 24,
+      "pairs": 768,
+      "sha256": "e474b191a3fd9e83a2f5dbcb13cd3c270a7372a18087c0f0c533d5dfd5496269"
+    },
+    "test": {
+      "travelers": 48,
+      "guides": 36,
+      "pairs": 1728,
+      "sha256": "ff38d7817b1ad7846bd25b30df8ade2961beac9744270e2235f7e4f5fa86c2eb"
+    }
+  },
+  "runs": [
+    {
+      "preset": "reference",
+      "seed": 42,
+      "path": "E:\\qinghe\\output\\matching_optimization\\reference_42.pt",
+      "validation": {
+        "mse": 0.0585031637932259,
+        "mae": {
+          "traveler": 0.1794286575489726,
+          "guide": 0.18408974875273998
+        },
+        "ndcg5": {
+          "traveler": 0.9525210900493131,
+          "guide": 0.9644402983474919,
+          "mutualTraveler": 0.8741577028624099,
+          "mutualGuide": 0.9487703897122532
+        },
+        "rankQueries": {
+          "traveler": 17,
+          "guide": 22,
+          "mutualTraveler": 17,
+          "mutualGuide": 22
+        }
+      },
+      "parameters": 84674,
+      "bestEpoch": 111,
+      "stoppedEpoch": 120
+    },
+    {
+      "preset": "compact",
+      "seed": 42,
+      "path": "E:\\qinghe\\output\\matching_optimization\\compact_42.pt",
+      "validation": {
+        "mse": 0.09387650846347666,
+        "mae": {
+          "traveler": 0.2739541478998338,
+          "guide": 0.22315278488288945
+        },
+        "ndcg5": {
+          "traveler": 0.9150418145972098,
+          "guide": 0.8515193364904896,
+          "mutualTraveler": 0.7797030170561248,
+          "mutualGuide": 0.8189570798630633
+        },
+        "rankQueries": {
+          "traveler": 17,
+          "guide": 22,
+          "mutualTraveler": 17,
+          "mutualGuide": 22
+        }
+      },
+      "parameters": 17970,
+      "bestEpoch": 49,
+      "stoppedEpoch": 64
+    },
+    {
+      "preset": "regularized",
+      "seed": 42,
+      "path": "E:\\qinghe\\output\\matching_optimization\\regularized_42.pt",
+      "validation": {
+        "mse": 0.09461576158030162,
+        "mae": {
+          "traveler": 0.27900681933776167,
+          "guide": 0.22384128023016578
+        },
+        "ndcg5": {
+          "traveler": 0.916807768562339,
+          "guide": 0.8764801407164513,
+          "mutualTraveler": 0.7530854832962242,
+          "mutualGuide": 0.835898206875327
+        },
+        "rankQueries": {
+          "traveler": 17,
+          "guide": 22,
+          "mutualTraveler": 17,
+          "mutualGuide": 22
+        }
+      },
+      "parameters": 17970,
+      "bestEpoch": 53,
+      "stoppedEpoch": 68
+    },
+    {
+      "preset": "lower_lr",
+      "seed": 42,
+      "path": "E:\\qinghe\\output\\matching_optimization\\lower_lr_42.pt",
+      "validation": {
+        "mse": 0.10110295295354214,
+        "mae": {
+          "traveler": 0.30642491901138175,
+          "guide": 0.22482622760192802
+        },
+        "ndcg5": {
+          "traveler": 0.9461462795826586,
+          "guide": 0.843403595735596,
+          "mutualTraveler": 0.8077985242103924,
+          "mutualGuide": 0.8409542282679792
+        },
+        "rankQueries": {
+          "traveler": 17,
+          "guide": 22,
+          "mutualTraveler": 17,
+          "mutualGuide": 22
+        }
+      },
+      "parameters": 17970,
+      "bestEpoch": 26,
+      "stoppedEpoch": 41
+    },
+    {
+      "preset": "rank_aware",
+      "seed": 42,
+      "path": "E:\\qinghe\\output\\matching_optimization\\rank_aware_42.pt",
+      "validation": {
+        "mse": 0.10104041982472596,
+        "mae": {
+          "traveler": 0.3065135437451924,
+          "guide": 0.2249040675427144
+        },
+        "ndcg5": {
+          "traveler": 0.9537763370940562,
+          "guide": 0.843403595735596,
+          "mutualTraveler": 0.805648587847677,
+          "mutualGuide": 0.8469055807030454
+        },
+        "rankQueries": {
+          "traveler": 17,
+          "guide": 22,
+          "mutualTraveler": 17,
+          "mutualGuide": 22
+        }
+      },
+      "parameters": 17970,
+      "bestEpoch": 26,
+      "stoppedEpoch": 41
+    },
+    {
+      "preset": "reference",
+      "seed": 7,
+      "path": "E:\\qinghe\\output\\matching_optimization\\reference_7.pt",
+      "validation": {
+        "mse": 0.09573644898264316,
+        "mae": {
+          "traveler": 0.28784067812375724,
+          "guide": 0.2195551298209466
+        },
+        "ndcg5": {
+          "traveler": 0.9077342392869805,
+          "guide": 0.854021820242563,
+          "mutualTraveler": 0.7707427909741138,
+          "mutualGuide": 0.8460255334438475
+        },
+        "rankQueries": {
+          "traveler": 17,
+          "guide": 22,
+          "mutualTraveler": 17,
+          "mutualGuide": 22
+        }
+      },
+      "parameters": 84674,
+      "bestEpoch": 25,
+      "stoppedEpoch": 40
+    },
+    {
+      "preset": "reference",
+      "seed": 101,
+      "path": "E:\\qinghe\\output\\matching_optimization\\reference_101.pt",
+      "validation": {
+        "mse": 0.05495670187272555,
+        "mae": {
+          "traveler": 0.17537164848696798,
+          "guide": 0.17421117798160898
+        },
+        "ndcg5": {
+          "traveler": 0.9352915112498463,
+          "guide": 0.9378435051767503,
+          "mutualTraveler": 0.8769964429809467,
+          "mutualGuide": 0.9374435455663872
+        },
+        "rankQueries": {
+          "traveler": 17,
+          "guide": 22,
+          "mutualTraveler": 17,
+          "mutualGuide": 22
+        }
+      },
+      "parameters": 84674,
+      "bestEpoch": 119,
+      "stoppedEpoch": 120
+    },
+    {
+      "preset": "compact",
+      "seed": 7,
+      "path": "E:\\qinghe\\output\\matching_optimization\\compact_7.pt",
+      "validation": {
+        "mse": 0.09918757861316542,
+        "mae": {
+          "traveler": 0.29862238947922987,
+          "guide": 0.2269988294574432
+        },
+        "ndcg5": {
+          "traveler": 0.9300914091444932,
+          "guide": 0.8666454945654342,
+          "mutualTraveler": 0.8221296844239085,
+          "mutualGuide": 0.85439343176471
+        },
+        "rankQueries": {
+          "traveler": 17,
+          "guide": 22,
+          "mutualTraveler": 17,
+          "mutualGuide": 22
+        }
+      },
+      "parameters": 17970,
+      "bestEpoch": 26,
+      "stoppedEpoch": 41
+    },
+    {
+      "preset": "compact",
+      "seed": 101,
+      "path": "E:\\qinghe\\output\\matching_optimization\\compact_101.pt",
+      "validation": {
+        "mse": 0.09416769648951871,
+        "mae": {
+          "traveler": 0.26572197493320954,
+          "guide": 0.22219583429008102
+        },
+        "ndcg5": {
+          "traveler": 0.9110012412752028,
+          "guide": 0.8654822835370652,
+          "mutualTraveler": 0.7589849194400038,
+          "mutualGuide": 0.8335202174711666
+        },
+        "rankQueries": {
+          "traveler": 17,
+          "guide": 22,
+          "mutualTraveler": 17,
+          "mutualGuide": 22
+        }
+      },
+      "parameters": 17970,
+      "bestEpoch": 43,
+      "stoppedEpoch": 58
+    }
+  ],
+  "finalistValidationMeanMSE": {
+    "reference": 0.06973210488286487,
+    "compact": 0.09574392785538693
+  },
+  "selectedPreset": "reference",
+  "selectedSeed": 101,
+  "selectedTest": {
+    "mse": 0.04349127093532618,
+    "mae": {
+      "traveler": 0.15295450098821456,
+      "guide": 0.15660472224300503
+    },
+    "ndcg5": {
+      "traveler": 0.9248758525393032,
+      "guide": 0.8909837298231073,
+      "mutualTraveler": 0.9369423635070678,
+      "mutualGuide": 0.9065929863468405
+    },
+    "rankQueries": {
+      "traveler": 39,
+      "guide": 23,
+      "mutualTraveler": 38,
+      "mutualGuide": 23
+    }
+  },
+  "originalV1Test": {
+    "mse": 0.07560388989108478,
+    "mae": {
+      "traveler": 0.20975866451853006,
+      "guide": 0.1781311665410983
+    },
+    "ndcg5": {
+      "traveler": 0.9537821869369036,
+      "guide": 0.9044991657167769,
+      "mutualTraveler": 0.8948722976431259,
+      "mutualGuide": 0.9292793489282528
+    },
+    "rankQueries": {
+      "traveler": 39,
+      "guide": 23,
+      "mutualTraveler": 38,
+      "mutualGuide": 23
+    }
+  },
+  "constantBaselineTest": {
+    "mse": 0.10749660370294495,
+    "mae": {
+      "traveler": 0.3133647490542865,
+      "guide": 0.24205582535446243
+    },
+    "ndcg5": {
+      "traveler": 0.9279495488421313,
+      "guide": 0.6563133197241137,
+      "mutualTraveler": 0.7601475915732923,
+      "mutualGuide": 0.6617427701954176
+    },
+    "rankQueries": {
+      "traveler": 39,
+      "guide": 23,
+      "mutualTraveler": 38,
+      "mutualGuide": 23
+    }
+  },
+  "teacherOracleTest": {
+    "mse": 0.0,
+    "mae": {
+      "traveler": 0.0,
+      "guide": 0.0
+    },
+    "ndcg5": {
+      "traveler": 1.0,
+      "guide": 1.0,
+      "mutualTraveler": 1.0,
+      "mutualGuide": 1.0
+    },
+    "rankQueries": {
+      "traveler": 39,
+      "guide": 23,
+      "mutualTraveler": 38,
+      "mutualGuide": 23
+    }
+  },
+  "selectedPresetTestSeeds": [
+    {
+      "seed": 42,
+      "metrics": {
+        "mse": 0.05571423706221495,
+        "mae": {
+          "traveler": 0.17100247797774232,
+          "guide": 0.18949988998873676
+        },
+        "ndcg5": {
+          "traveler": 0.9366992548381975,
+          "guide": 0.8865879235317923,
+          "mutualTraveler": 0.8766413600323354,
+          "mutualGuide": 0.8758510956762042
+        },
+        "rankQueries": {
+          "traveler": 39,
+          "guide": 23,
+          "mutualTraveler": 38,
+          "mutualGuide": 23
+        }
+      }
+    },
+    {
+      "seed": 7,
+      "metrics": {
+        "mse": 0.10214669444650154,
+        "mae": {
+          "traveler": 0.2958199156456868,
+          "guide": 0.23755040863977261
+        },
+        "ndcg5": {
+          "traveler": 0.9262117279424122,
+          "guide": 0.7735257958543016,
+          "mutualTraveler": 0.7404506669860519,
+          "mutualGuide": 0.7553098265854001
+        },
+        "rankQueries": {
+          "traveler": 39,
+          "guide": 23,
+          "mutualTraveler": 38,
+          "mutualGuide": 23
+        }
+      }
+    },
+    {
+      "seed": 101,
+      "metrics": {
+        "mse": 0.04349127093532618,
+        "mae": {
+          "traveler": 0.15295450098821456,
+          "guide": 0.15660472224300503
+        },
+        "ndcg5": {
+          "traveler": 0.9248758525393032,
+          "guide": 0.8909837298231073,
+          "mutualTraveler": 0.9369423635070678,
+          "mutualGuide": 0.9065929863468405
+        },
+        "rankQueries": {
+          "traveler": 39,
+          "guide": 23,
+          "mutualTraveler": 38,
+          "mutualGuide": 23
+        }
+      }
+    }
+  ],
+  "testMAEAcrossSeeds": {
+    "traveler": {
+      "mean": 0.20659229820388123,
+      "std": 0.06352221739470129
+    },
+    "guide": {
+      "mean": 0.19455167362383813,
+      "std": 0.033238445862012155
+    }
+  },
+  "promoted": false,
+  "maxEpochs": 120,
+  "notice": "All data and targets are synthetic; teacher rules are exact by construction, not real-user feedback."
+}

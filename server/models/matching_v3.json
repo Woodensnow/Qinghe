@@ -1,0 +1,137 @@
+{
+  "source": "synthetic-demo",
+  "model": "TinyTransformer-HeteroGNN-v3-ensemble",
+  "dataSeed": 31415,
+  "maxEpochs": 180,
+  "preset": "wide_compact",
+  "selection": "v3: freeze 3 presets x 3 seeds; select ensemble on validation mutual NDCG@5; prospective confirmation after selection",
+  "torchVersion": "2.15.0+cpu",
+  "trainActors": {
+    "travelers": 96,
+    "guides": 72
+  },
+  "validationActors": {
+    "travelers": 32,
+    "guides": 24
+  },
+  "trainPairs": 6912,
+  "validationPairs": 768,
+  "validationMetrics": {
+    "mse": 0.17609183430404932,
+    "mae": {
+      "traveler": 0.4968074725087111,
+      "guide": 0.07607925466436427
+    },
+    "eligibleMSE": 0.021023560126933755,
+    "eligibleMAE": {
+      "traveler": 0.13816757896278478,
+      "guide": 0.0641217584945733
+    },
+    "eligiblePairs": 79,
+    "ndcg5": {
+      "traveler": 0.9865055344737946,
+      "guide": 1.0,
+      "mutualTraveler": 0.9929579665339014,
+      "mutualGuide": 0.9946727332526089
+    },
+    "rankQueries": {
+      "traveler": 17,
+      "guide": 22,
+      "mutualTraveler": 17,
+      "mutualGuide": 22
+    }
+  },
+  "syntheticValidationMAE": {
+    "traveler": 0.4968074725087111,
+    "guide": 0.07607925466436427
+  },
+  "constantBaselineMAE": {
+    "traveler": 0.30661155287331593,
+    "guide": 0.22544623313782117
+  },
+  "parameters": 54678,
+  "notice": "合成规则蒸馏；三种子集成与独立模板确认，不代表真实用户接受概率。",
+  "seeds": [
+    42,
+    7,
+    101
+  ],
+  "members": 3,
+  "confirmationMetrics": {
+    "mse": 0.19216844686539722,
+    "mae": {
+      "traveler": 0.5282476474894793,
+      "guide": 0.07592598013434326
+    },
+    "eligibleMSE": 0.026364349082568076,
+    "eligibleMAE": {
+      "traveler": 0.15681765140113185,
+      "guide": 0.07126442803922346
+    },
+    "eligiblePairs": 295,
+    "ndcg5": {
+      "traveler": 0.9323057311004891,
+      "guide": 0.9988822762510174,
+      "mutualTraveler": 0.9874521809058197,
+      "mutualGuide": 0.9920585107756243
+    },
+    "rankQueries": {
+      "traveler": 55,
+      "guide": 41,
+      "mutualTraveler": 54,
+      "mutualGuide": 41
+    }
+  },
+  "originalConfirmationMetrics": {
+    "mse": 0.07336423022222513,
+    "mae": {
+      "traveler": 0.21161235875085063,
+      "guide": 0.1820351136946338
+    },
+    "eligibleMSE": 0.07913481389068991,
+    "eligibleMAE": {
+      "traveler": 0.2224800559865721,
+      "guide": 0.16903794180992518
+    },
+    "eligiblePairs": 295,
+    "ndcg5": {
+      "traveler": 0.9257010311978667,
+      "guide": 0.931016697243427,
+      "mutualTraveler": 0.8925761807182113,
+      "mutualGuide": 0.9303627701373313
+    },
+    "rankQueries": {
+      "traveler": 55,
+      "guide": 41,
+      "mutualTraveler": 54,
+      "mutualGuide": 41
+    }
+  },
+  "confirmationActors": {
+    "travelers": 64,
+    "guides": 48,
+    "pairs": 3072,
+    "sha256": "3b24f811cc7d455a631d375b0e3dcd419c7c9e6525981391b80c9a01154f68b7"
+  },
+  "optimizationReport": "docs/matching_refinement_report.json",
+  "memberTraining": [
+    {
+      "seed": 42,
+      "bestEpoch": 179,
+      "stoppedEpoch": 180,
+      "parameters": 18226
+    },
+    {
+      "seed": 7,
+      "bestEpoch": 72,
+      "stoppedEpoch": 97,
+      "parameters": 18226
+    },
+    {
+      "seed": 101,
+      "bestEpoch": 103,
+      "stoppedEpoch": 128,
+      "parameters": 18226
+    }
+  ]
+}

@@ -1,0 +1,9 @@
+[project]
+name = "qinghe-city-sidegig"
+version = "2.0.0"
+description = "青禾 · 城市轻兼职 Python 版"
+requires-python = ">=3.10"
+dependencies = []
+
+[project.optional-dependencies]
+matching = ["torch>=2.5,<3", "numpy>=1.26,<3"]

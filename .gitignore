@@ -1,0 +1,15 @@
+node_modules/
+tmp/
+.DS_Store
+*.log
+server/data.json
+
+public/uploads/*
+!public/uploads/.gitkeep
+
+server/server.pid
+__pycache__/
+*.py[cod]
+.venv/
+server/data.json.tmp
+output/

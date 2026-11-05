@@ -1,0 +1,558 @@
+{
+  "protocol": "v4 (text coverage + unknown-character augmentation): freeze 3 presets x 3 seeds; select ensemble on validation mutual NDCG@5; prospective confirmation after selection",
+  "dataSeed": 31415,
+  "runs": [
+    {
+      "preset": "wide_deep",
+      "seed": 42,
+      "bestEpoch": 124,
+      "stoppedEpoch": 149,
+      "parameters": 94658,
+      "validation": {
+        "mse": 0.1927984491907311,
+        "mae": {
+          "traveler": 0.513002741499804,
+          "guide": 0.07426996065623825
+        },
+        "eligibleMSE": 0.031998335191664354,
+        "eligibleMAE": {
+          "traveler": 0.17440130212638952,
+          "guide": 0.06683480777317964
+        },
+        "eligiblePairs": 79,
+        "ndcg5": {
+          "traveler": 0.9139593353754032,
+          "guide": 1.0,
+          "mutualTraveler": 0.9897850991736753,
+          "mutualGuide": 0.9970922441498465
+        },
+        "rankQueries": {
+          "traveler": 17,
+          "guide": 22,
+          "mutualTraveler": 17,
+          "mutualGuide": 22
+        }
+      }
+    },
+    {
+      "preset": "wide_deep",
+      "seed": 7,
+      "bestEpoch": 92,
+      "stoppedEpoch": 117,
+      "parameters": 94658,
+      "validation": {
+        "mse": 0.19202479742080406,
+        "mae": {
+          "traveler": 0.5233399926607186,
+          "guide": 0.07572012549887101
+        },
+        "eligibleMSE": 0.028402420737442178,
+        "eligibleMAE": {
+          "traveler": 0.16735463089580777,
+          "guide": 0.06789783525127399
+        },
+        "eligiblePairs": 79,
+        "ndcg5": {
+          "traveler": 0.9240506071667929,
+          "guide": 1.0,
+          "mutualTraveler": 0.9915982225433405,
+          "mutualGuide": 0.9943431632215578
+        },
+        "rankQueries": {
+          "traveler": 17,
+          "guide": 22,
+          "mutualTraveler": 17,
+          "mutualGuide": 22
+        }
+      }
+    },
+    {
+      "preset": "wide_deep",
+      "seed": 101,
+      "bestEpoch": 132,
+      "stoppedEpoch": 157,
+      "parameters": 94658,
+      "validation": {
+        "mse": 0.18452235101060954,
+        "mae": {
+          "traveler": 0.5096174721450856,
+          "guide": 0.07214216389305268
+        },
+        "eligibleMSE": 0.023648753881492398,
+        "eligibleMAE": {
+          "traveler": 0.14048453222347212,
+          "guide": 0.06869972417060333
+        },
+        "eligiblePairs": 79,
+        "ndcg5": {
+          "traveler": 0.9663406270970311,
+          "guide": 1.0,
+          "mutualTraveler": 0.9941119783099498,
+          "mutualGuide": 0.9916658160459219
+        },
+        "rankQueries": {
+          "traveler": 17,
+          "guide": 22,
+          "mutualTraveler": 17,
+          "mutualGuide": 22
+        }
+      }
+    },
+    {
+      "preset": "wide_compact",
+      "seed": 42,
+      "bestEpoch": 104,
+      "stoppedEpoch": 129,
+      "parameters": 22962,
+      "validation": {
+        "mse": 0.2049722019607404,
+        "mae": {
+          "traveler": 0.5418147783493623,
+          "guide": 0.08645696270104963
+        },
+        "eligibleMSE": 0.03488416749626514,
+        "eligibleMAE": {
+          "traveler": 0.17076066174084628,
+          "guide": 0.07498345524072647
+        },
+        "eligiblePairs": 79,
+        "ndcg5": {
+          "traveler": 0.9191780765326734,
+          "guide": 0.9994038519335622,
+          "mutualTraveler": 0.9949106266483364,
+          "mutualGuide": 0.9926545450752023
+        },
+        "rankQueries": {
+          "traveler": 17,
+          "guide": 22,
+          "mutualTraveler": 17,
+          "mutualGuide": 22
+        }
+      }
+    },
+    {
+      "preset": "wide_compact",
+      "seed": 7,
+      "bestEpoch": 94,
+      "stoppedEpoch": 119,
+      "parameters": 22962,
+      "validation": {
+        "mse": 0.17663368795144618,
+        "mae": {
+          "traveler": 0.48914001261194545,
+          "guide": 0.09937144368692923
+        },
+        "eligibleMSE": 0.037618517188937155,
+        "eligibleMAE": {
+          "traveler": 0.185593207425709,
+          "guide": 0.08863622930985463
+        },
+        "eligiblePairs": 79,
+        "ndcg5": {
+          "traveler": 0.9020970733613237,
+          "guide": 1.0,
+          "mutualTraveler": 0.9937274217209859,
+          "mutualGuide": 0.9926702556365531
+        },
+        "rankQueries": {
+          "traveler": 17,
+          "guide": 22,
+          "mutualTraveler": 17,
+          "mutualGuide": 22
+        }
+      }
+    },
+    {
+      "preset": "wide_compact",
+      "seed": 101,
+      "bestEpoch": 131,
+      "stoppedEpoch": 156,
+      "parameters": 22962,
+      "validation": {
+        "mse": 0.1864926789579817,
+        "mae": {
+          "traveler": 0.517365705803968,
+          "guide": 0.07288440860672078
+        },
+        "eligibleMSE": 0.031210266758631484,
+        "eligibleMAE": {
+          "traveler": 0.16735198414778407,
+          "guide": 0.0649248293211943
+        },
+        "eligiblePairs": 79,
+        "ndcg5": {
+          "traveler": 0.9110738794901262,
+          "guide": 1.0,
+          "mutualTraveler": 0.9908760650749118,
+          "mutualGuide": 0.9926702556365531
+        },
+        "rankQueries": {
+          "traveler": 17,
+          "guide": 22,
+          "mutualTraveler": 17,
+          "mutualGuide": 22
+        }
+      }
+    },
+    {
+      "preset": "wide_stable",
+      "seed": 42,
+      "bestEpoch": 152,
+      "stoppedEpoch": 172,
+      "parameters": 73058,
+      "validation": {
+        "mse": 0.19448382708001088,
+        "mae": {
+          "traveler": 0.5227286606871834,
+          "guide": 0.09754817657327901
+        },
+        "eligibleMSE": 0.032098180528621664,
+        "eligibleMAE": {
+          "traveler": 0.1721713203418104,
+          "guide": 0.07854918984672692
+        },
+        "eligiblePairs": 79,
+        "ndcg5": {
+          "traveler": 0.9187360921911409,
+          "guide": 1.0,
+          "mutualTraveler": 0.9929977287927045,
+          "mutualGuide": 0.9926702556365531
+        },
+        "rankQueries": {
+          "traveler": 17,
+          "guide": 22,
+          "mutualTraveler": 17,
+          "mutualGuide": 22
+        }
+      }
+    },
+    {
+      "preset": "wide_stable",
+      "seed": 7,
+      "bestEpoch": 174,
+      "stoppedEpoch": 180,
+      "parameters": 73058,
+      "validation": {
+        "mse": 0.19707510251369784,
+        "mae": {
+          "traveler": 0.5309444180068871,
+          "guide": 0.09015306804212742
+        },
+        "eligibleMSE": 0.03238571224341975,
+        "eligibleMAE": {
+          "traveler": 0.17468947247613834,
+          "guide": 0.07372123616028435
+        },
+        "eligiblePairs": 79,
+        "ndcg5": {
+          "traveler": 0.9300074310092208,
+          "guide": 1.0,
+          "mutualTraveler": 0.989462764754849,
+          "mutualGuide": 0.992340685605502
+        },
+        "rankQueries": {
+          "traveler": 17,
+          "guide": 22,
+          "mutualTraveler": 17,
+          "mutualGuide": 22
+        }
+      }
+    },
+    {
+      "preset": "wide_stable",
+      "seed": 101,
+      "bestEpoch": 178,
+      "stoppedEpoch": 180,
+      "parameters": 73058,
+      "validation": {
+        "mse": 0.19738311112889895,
+        "mae": {
+          "traveler": 0.5293356603554761,
+          "guide": 0.08996170687411602
+        },
+        "eligibleMSE": 0.029058416078388768,
+        "eligibleMAE": {
+          "traveler": 0.1604635779616199,
+          "guide": 0.07922518465526496
+        },
+        "eligiblePairs": 79,
+        "ndcg5": {
+          "traveler": 0.9679924213501367,
+          "guide": 1.0,
+          "mutualTraveler": 0.9932810448493842,
+          "mutualGuide": 0.9926702556365531
+        },
+        "rankQueries": {
+          "traveler": 17,
+          "guide": 22,
+          "mutualTraveler": 17,
+          "mutualGuide": 22
+        }
+      }
+    }
+  ],
+  "ensembleValidation": {
+    "wide_deep": {
+      "mse": 0.18551526741232152,
+      "mae": {
+        "traveler": 0.5112360564914221,
+        "guide": 0.06836344109130248
+      },
+      "eligibleMSE": 0.023746297155886272,
+      "eligibleMAE": {
+        "traveler": 0.15350321953809715,
+        "guide": 0.06415998412272599
+      },
+      "eligiblePairs": 79,
+      "ndcg5": {
+        "traveler": 0.939405416607839,
+        "guide": 1.0,
+        "mutualTraveler": 0.9911148279499251,
+        "mutualGuide": 0.9926702556365531
+      },
+      "rankQueries": {
+        "traveler": 17,
+        "guide": 22,
+        "mutualTraveler": 17,
+        "mutualGuide": 22
+      }
+    },
+    "wide_compact": {
+      "mse": 0.18518186042345308,
+      "mae": {
+        "traveler": 0.5133666423692679,
+        "guide": 0.08100082189776003
+      },
+      "eligibleMSE": 0.02999249716290037,
+      "eligibleMAE": {
+        "traveler": 0.16473767387716076,
+        "guide": 0.06988435625275478
+      },
+      "eligiblePairs": 79,
+      "ndcg5": {
+        "traveler": 0.9091748724298183,
+        "guide": 1.0,
+        "mutualTraveler": 0.9902314760452771,
+        "mutualGuide": 0.992837732508713
+      },
+      "rankQueries": {
+        "traveler": 17,
+        "guide": 22,
+        "mutualTraveler": 17,
+        "mutualGuide": 22
+      }
+    },
+    "wide_stable": {
+      "mse": 0.1938848029129081,
+      "mae": {
+        "traveler": 0.5244372682257866,
+        "guide": 0.08842886947968509
+      },
+      "eligibleMSE": 0.028273516387738583,
+      "eligibleMAE": {
+        "traveler": 0.16113142838960962,
+        "guide": 0.07377356932133058
+      },
+      "eligiblePairs": 79,
+      "ndcg5": {
+        "traveler": 0.9328316946515374,
+        "guide": 1.0,
+        "mutualTraveler": 0.9929977287927045,
+        "mutualGuide": 0.9926702556365531
+      },
+      "rankQueries": {
+        "traveler": 17,
+        "guide": 22,
+        "mutualTraveler": 17,
+        "mutualGuide": 22
+      }
+    }
+  },
+  "selectedPreset": "wide_stable",
+  "confirmation": {
+    "travelers": 64,
+    "guides": 48,
+    "pairs": 3072,
+    "sha256": "8f3db4cb5af3a8f9b79f96c4ddc8c682c1191a378c4c0214de58f53b545b157c"
+  },
+  "selectedConfirmation": {
+    "mse": 0.20000076961224003,
+    "mae": {
+      "traveler": 0.5358326534211907,
+      "guide": 0.08618670674817015
+    },
+    "eligibleMSE": 0.030455307663274925,
+    "eligibleMAE": {
+      "traveler": 0.16619380106360226,
+      "guide": 0.07833528417651936
+    },
+    "eligiblePairs": 295,
+    "ndcg5": {
+      "traveler": 0.9232398747045286,
+      "guide": 0.9983322118521734,
+      "mutualTraveler": 0.9873215124259382,
+      "mutualGuide": 0.9906893363072032
+    },
+    "rankQueries": {
+      "traveler": 55,
+      "guide": 41,
+      "mutualTraveler": 54,
+      "mutualGuide": 41
+    }
+  },
+  "originalV1Confirmation": {
+    "mse": 0.11674271321673098,
+    "mae": {
+      "traveler": 0.31946196879562194,
+      "guide": 0.19085517672013452
+    },
+    "eligibleMSE": 0.0679177729630796,
+    "eligibleMAE": {
+      "traveler": 0.1870494751164974,
+      "guide": 0.1771177809521698
+    },
+    "eligiblePairs": 295,
+    "ndcg5": {
+      "traveler": 0.9231149695174741,
+      "guide": 0.9243752331490891,
+      "mutualTraveler": 0.8814424354333568,
+      "mutualGuide": 0.9253175373429272
+    },
+    "rankQueries": {
+      "traveler": 55,
+      "guide": 41,
+      "mutualTraveler": 54,
+      "mutualGuide": 41
+    }
+  },
+  "constantBaselineConfirmation": {
+    "mse": 0.1012476431596635,
+    "mae": {
+      "traveler": 0.3149488746494171,
+      "guide": 0.22129458462586626
+    },
+    "eligibleMSE": 0.1671234701720501,
+    "eligibleMAE": {
+      "traveler": 0.476045233415345,
+      "guide": 0.22163211359816082
+    },
+    "eligiblePairs": 295,
+    "ndcg5": {
+      "traveler": 0.9233444950510574,
+      "guide": 0.6197084007573186,
+      "mutualTraveler": 0.7588818783657433,
+      "mutualGuide": 0.6226259794847243
+    },
+    "rankQueries": {
+      "traveler": 55,
+      "guide": 41,
+      "mutualTraveler": 54,
+      "mutualGuide": 41
+    }
+  },
+  "teacherOracleConfirmation": {
+    "mse": 0.0,
+    "mae": {
+      "traveler": 0.0,
+      "guide": 0.0
+    },
+    "eligibleMSE": 0.0,
+    "eligibleMAE": {
+      "traveler": 0.0,
+      "guide": 0.0
+    },
+    "eligiblePairs": 295,
+    "ndcg5": {
+      "traveler": 1.0,
+      "guide": 1.0,
+      "mutualTraveler": 1.0,
+      "mutualGuide": 1.0
+    },
+    "rankQueries": {
+      "traveler": 55,
+      "guide": 41,
+      "mutualTraveler": 54,
+      "mutualGuide": 41
+    }
+  },
+  "selectedSeedConfirmations": [
+    {
+      "mse": 0.19486683425537507,
+      "mae": {
+        "traveler": 0.5254238571190702,
+        "guide": 0.09791650613260572
+      },
+      "eligibleMSE": 0.03653203082917922,
+      "eligibleMAE": {
+        "traveler": 0.1830090475284447,
+        "guide": 0.0892994098870431
+      },
+      "eligiblePairs": 295,
+      "ndcg5": {
+        "traveler": 0.9090474480945988,
+        "guide": 0.9976481799453433,
+        "mutualTraveler": 0.9819883829604622,
+        "mutualGuide": 0.9927311659208835
+      },
+      "rankQueries": {
+        "traveler": 55,
+        "guide": 41,
+        "mutualTraveler": 54,
+        "mutualGuide": 41
+      }
+    },
+    {
+      "mse": 0.20833067489178547,
+      "mae": {
+        "traveler": 0.547541674990498,
+        "guide": 0.090559204868138
+      },
+      "eligibleMSE": 0.03488401110745725,
+      "eligibleMAE": {
+        "traveler": 0.16986752960641505,
+        "guide": 0.08510128786250697
+      },
+      "eligiblePairs": 295,
+      "ndcg5": {
+        "traveler": 0.91185010375559,
+        "guide": 0.99906139650901,
+        "mutualTraveler": 0.9860281786094037,
+        "mutualGuide": 0.9912648335582828
+      },
+      "rankQueries": {
+        "traveler": 55,
+        "guide": 41,
+        "mutualTraveler": 54,
+        "mutualGuide": 41
+      }
+    },
+    {
+      "mse": 0.2044594634859974,
+      "mae": {
+        "traveler": 0.538655875272525,
+        "guide": 0.09015091558588513
+      },
+      "eligibleMSE": 0.02849926101496355,
+      "eligibleMAE": {
+        "traveler": 0.15544525526337705,
+        "guide": 0.07886354622068041
+      },
+      "eligiblePairs": 295,
+      "ndcg5": {
+        "traveler": 0.940282033095028,
+        "guide": 0.99788335804354,
+        "mutualTraveler": 0.991980661353363,
+        "mutualGuide": 0.9898716875985334
+      },
+      "rankQueries": {
+        "traveler": 55,
+        "guide": 41,
+        "mutualTraveler": 54,
+        "mutualGuide": 41
+      }
+    }
+  ],
+  "promoted": true,
+  "earlierExploratoryReport": "output/matching_optimization/report.json",
+  "notice": "Synthetic rule distillation only; shared generator, structured categories and boilerplate remain across splits."
+}

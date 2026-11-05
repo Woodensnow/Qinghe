@@ -1,0 +1,21 @@
+{
+  "source": "synthetic-demo",
+  "model": "TinyTransformer-HeteroGNN-v1",
+  "seed": 42,
+  "epochs": 200,
+  "torchVersion": "2.15.0+cpu",
+  "trainPairs": 864,
+  "validationPairs": 120,
+  "initialLoss": 0.19893589615821838,
+  "finalLoss": 0.0009143850184045732,
+  "syntheticValidationMAE": {
+    "traveler": 0.2141897827386856,
+    "guide": 0.1382392942905426
+  },
+  "constantBaselineMAE": {
+    "traveler": 0.33905234932899475,
+    "guide": 0.22602815926074982
+  },
+  "parameters": 84674,
+  "notice": "仅合成偏好监督；分数未校准，不是接受概率，未验证真实推荐效果。"
+}
