@@ -329,3 +329,4 @@ python tools/package_project.py --group 3
 双边匹配的旅人需求保存在 `server/data.json` 的 `matchTrips`，地陪偏好保存在服务的 `matchPreferences`。提交打包仍排除这些现有业务数据；模型权重仅来自合成样例，会随源码包提供。
 
 模型优化的对照实验、训练/验证曲线、候选误差与排序结果、失败尝试及计算开销见 [优化报告](docs/OPTIMIZATION.md)。最新版完整回归为 43 项测试通过。
+# Qinghe
