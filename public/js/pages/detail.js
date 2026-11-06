@@ -8,15 +8,18 @@ import {
   formatDateCN,
   icon,
   initReveals,
+  isBookableDate,
   isFavorite,
   localDateISO,
   money,
+  readTripDate,
   relativeDateLabel,
   setPageTitle,
   showModal,
   toast,
   toggleFavorite,
-  weekdayCN
+  weekdayCN,
+  writeTripDate
 } from '../ui.js?v=1.7.0';
 
 const TIME_SLOTS = ['09:00', '10:00', '11:00', '13:00', '14:00', '15:00', '16:00', '17:00', '18:00', '19:00'];
@@ -33,18 +36,16 @@ function paragraphs(text) {
     .join('');
 }
 
-function getInitialDate() {
-  let stored = '';
-  try {
-    stored = sessionStorage.getItem('qinghe_trip_date') || '';
-  } catch {
-    stored = '';
+function takeTripDate() {
+  const requested = new URLSearchParams(window.location.search).get('date') || '';
+  const stored = readTripDate();
+  const candidate = requested || stored;
+  if (isBookableDate(candidate)) {
+    if (requested) writeTripDate(candidate);
+    return { date: candidate, rejected: false };
   }
-  const today = localDateISO();
-  const requested = new URLSearchParams(window.location.search).get('date');
-  if (requested) stored = requested;
-  if (stored && stored >= today && stored <= localDateISO(addDays(180))) return stored;
-  return localDateISO(addDays(1));
+  if (stored && !isBookableDate(stored)) writeTripDate('');
+  return { date: localDateISO(addDays(1)), rejected: Boolean(candidate) };
 }
 
 function dateChoices(selectedDate) {
@@ -61,7 +62,7 @@ function dateChoices(selectedDate) {
       label: relativeDateLabel(iso)
     });
   }
-  if (!choices.some((choice) => choice.iso === selectedDate) && selectedDate >= localDateISO()) {
+  if (!choices.some((choice) => choice.iso === selectedDate) && isBookableDate(selectedDate)) {
     const date = new Date(`${selectedDate}T12:00:00`);
     if (!Number.isNaN(date.getTime())) {
       choices.unshift({
@@ -80,7 +81,7 @@ function dateChoices(selectedDate) {
 function dateChips(selectedDate) {
   return dateChoices(selectedDate)
     .map(
-      (choice) => `<button type="button" class="date-chip ${choice.iso === selectedDate ? 'is-active' : ''}" data-date="${choice.iso}"
+      (choice) => `<button type="button" class="date-chip ${choice.iso === selectedDate ? 'is-active' : ''}" data-date="${escapeHTML(choice.iso)}"
         ${choice.disabled ? 'disabled' : ''} aria-pressed="${choice.iso === selectedDate}">
         <span>${choice.weekday}</span>
         <strong>${choice.day}</strong>
@@ -183,10 +184,9 @@ function openLightbox(images, startIndex = 0) {
   document.addEventListener('keydown', keyHandler);
 }
 
-function detailShell(guide) {
+function detailShell(guide, selectedDate) {
   const images = (guide.gallery || [guide.cover]).slice(0, 3);
   const selectedPackage = guide.packages[0];
-  const selectedDate = getInitialDate();
   const saved = isFavorite(guide.id);
   const reviewSummary = guide.reviewCount
     ? `${Number(guide.rating).toFixed(1)} · ${guide.reviewCount} 条评价`
@@ -471,7 +471,9 @@ export async function renderGuideDetail(root, route) {
   }
 
   setPageTitle(`${guide.name} · ${guide.city}地陪`);
-  root.innerHTML = detailShell(guide);
+  const trip = takeTripDate();
+  root.innerHTML = detailShell(guide, trip.date);
+  if (trip.rejected) toast('出发日期需要在今天起 180 天内，已改为明天。', 'error');
   initReveals(root);
 
   const images = (guide.gallery || [guide.cover]).slice(0, 3);
@@ -533,7 +535,7 @@ export async function renderGuideDetail(root, route) {
   const unitHead = bookingCard.querySelector('.booking-unit');
 
   let selectedPackageId = guide.packages.find(pkg => pkg.id === route.search.get('package'))?.id || guide.packages[0].id;
-  let selectedDate = getInitialDate();
+  let selectedDate = trip.date;
   let people = Math.min(8, Math.max(1, Math.round(Number(route.search.get('people')) || 1)));
   if (TIME_SLOTS.includes(route.search.get('time'))) timeSelect.value = route.search.get('time');
 

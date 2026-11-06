@@ -3061,6 +3061,18 @@ a:focus:not(:focus-visible) {
 
 .plan-date .icon { width: 12px; height: 12px; }
 
+.plan-date-warning {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: -6px 0 18px;
+  color: var(--red);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.plan-date-warning .icon { width: 14px; height: 14px; flex: none; }
+
 .empty-state {
   display: flex;
   flex-direction: column;

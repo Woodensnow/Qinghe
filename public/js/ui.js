@@ -97,15 +97,52 @@ export function cityOptionsHTML(groups, selected = '', { allLabel = '' } = {}) {
   return all + grouped;
 }
 
+export const TRIP_HORIZON_DAYS = 180;
+const TRIP_DATE_KEY = 'qinghe_trip_date';
+
+/** True only for a real calendar day written as YYYY-MM-DD. Never treats other text as a date. */
+export function isRealDateISO(value) {
+  if (typeof value !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(value)) return false;
+  const [year, month, day] = value.split('-').map(Number);
+  const parsed = new Date(year, month - 1, day);
+  return parsed.getFullYear() === year && parsed.getMonth() === month - 1 && parsed.getDate() === day;
+}
+
+export function maxTripDateISO() {
+  return localDateISO(addDays(TRIP_HORIZON_DAYS));
+}
+
+/** Today through today + 180 days, matching the booking API. */
+export function isBookableDate(value) {
+  return isRealDateISO(value) && value >= localDateISO() && value <= maxTripDateISO();
+}
+
+export function readTripDate() {
+  try {
+    return sessionStorage.getItem(TRIP_DATE_KEY) || '';
+  } catch {
+    return '';
+  }
+}
+
+export function writeTripDate(value) {
+  try {
+    if (isBookableDate(value)) sessionStorage.setItem(TRIP_DATE_KEY, value);
+    else sessionStorage.removeItem(TRIP_DATE_KEY);
+  } catch {
+    /* sessionStorage 不可用时忽略 */
+  }
+}
+
 export function formatShortDate(dateString) {
-  const [y, m, d] = String(dateString).split('-').map(Number);
-  if (!y || !m || !d) return dateString;
-  return `${m}/${String(d).padStart(2, '0')}`;
+  if (!isRealDateISO(dateString)) return '';
+  const [, month, day] = dateString.split('-');
+  return `${Number(month)}/${day}`;
 }
 
 export function formatDateCN(dateString, { year = false } = {}) {
-  const [y, m, d] = String(dateString).split('-').map(Number);
-  if (!y || !m || !d) return dateString;
+  if (!isRealDateISO(dateString)) return '';
+  const [y, m, d] = dateString.split('-').map(Number);
   return `${year ? `${y}年` : ''}${m}月${d}日`;
 }
 

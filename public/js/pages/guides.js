@@ -9,10 +9,12 @@ import {
   formatDateCN,
   icon,
   initReveals,
-  localDateISO,
+  isBookableDate,
+  readTripDate,
   setPageTitle,
   showModal,
-  toast
+  toast,
+  writeTripDate
 } from '../ui.js?v=1.7.0';
 
 const PRICE_OPTIONS = [
@@ -64,12 +66,19 @@ function filterGuides(guides, filters) {
 export function renderGuides(root, route) {
   const meta = appState.meta;
   const filters = getFilters(route.search);
-  if (filters.date) {
-    try {
-      sessionStorage.setItem('qinghe_trip_date', filters.date);
-    } catch {
-      /* sessionStorage 不可用时忽略 */
-    }
+  const storedDate = readTripDate();
+  if (storedDate && !isBookableDate(storedDate)) writeTripDate('');
+  const requestedDate = filters.date;
+  const plannedDate = isBookableDate(requestedDate) ? requestedDate : '';
+  const dateRejected = Boolean(requestedDate) && !plannedDate;
+  if (dateRejected) {
+    filters.date = '';
+    const params = new URLSearchParams(route.search);
+    params.delete('date');
+    const query = params.toString();
+    replaceUrl(`/guides${query ? `?${query}` : ''}`);
+  } else if (plannedDate) {
+    writeTripDate(plannedDate);
   }
   setPageTitle('找地陪');
 
@@ -169,8 +178,9 @@ export function renderGuides(root, route) {
             <h2>为你找到 <span data-result-count>—</span> 位本地搭子</h2>
             <p data-result-sub>正在翻找这座城市的隐藏路线…</p>
           </div>
-          ${filters.date && filters.date >= localDateISO() ? `<span class="plan-date">${icon('calendar')} 计划 ${formatDateCN(filters.date)} 出发</span>` : ''}
+          ${plannedDate ? `<span class="plan-date">${icon('calendar')} 计划 ${escapeHTML(formatDateCN(plannedDate))} 出发</span>` : ''}
         </div>
+        ${dateRejected ? `<p class="plan-date-warning" role="alert">${icon('alert')} 这个出发日期无法使用。请重新选择今天起 180 天内的日期。</p>` : ''}
 
         <div class="guide-grid" data-guide-results>
           ${guideCardSkeleton()}${guideCardSkeleton()}${guideCardSkeleton()}

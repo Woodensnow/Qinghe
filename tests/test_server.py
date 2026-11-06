@@ -125,6 +125,21 @@ class ApiTests(ApiFixture):
         booking['date'] = '2027-02-30'
         self.assertEqual(self.request('POST', '/api/bookings', booking)[0], 400)
 
+    def test_shorter_package_never_costs_more_than_a_longer_one(self):
+        for price in range(50, 3001):
+            half, full, evening = (package['price'] for package in server.make_packages('苏州', price))
+            self.assertLessEqual(evening, half)
+            self.assertLessEqual(half, full)
+        self.assertEqual([package['price'] for package in server.make_packages('苏州', 50)], [50, 90, 50])
+        self.assertEqual([package['price'] for package in server.make_packages('苏州', 200)], [200, 340, 150])
+        self.login()
+        guide = dict(name='低价向导', city='上海', headline='一起慢慢走进上海的小马路',
+                     bio='我住在上海很多年，喜欢城市漫步和拍照，愿意为你定制一条轻松的旅行路线。',
+                     price=50, cover=server.CATALOG['COVER_PRESETS'][0]['value'], services=['城市漫步'], languages=['中文'])
+        status, body, _ = self.request('POST', '/api/guides', guide)
+        self.assertEqual(status, 201)
+        self.assertEqual([package['price'] for package in body['guide']['packages']], [50, 90, 50])
+
     def test_guide_and_two_way_chat_permissions(self):
         self.login()
         guide = dict(name='测试地陪', city='上海', headline='一起慢慢走进上海的小马路', bio='我住在上海很多年，喜欢城市漫步和拍照，愿意为你定制一条轻松的旅行路线。', price=200, cover=server.CATALOG['COVER_PRESETS'][0]['value'], services=['城市漫步'], languages=['中文'])
