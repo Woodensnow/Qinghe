@@ -141,12 +141,21 @@ def usable_cover(cover):
         re.fullmatch(r'/uploads/[A-Za-z0-9._-]+', cover) and (UPLOADS / cover.rsplit('/', 1)[-1]).is_file())
 
 
+def rounded_package_price(amount):
+    return math.floor(amount / 10 + .5) * 10
+
+
 def make_packages(city, price):
+    # Shorter packages must not cost more than longer ones. The evening floor of
+    # ¥60 would otherwise exceed a half-day base of ¥50–¥59.
+    half = price
+    full = max(half, 80, rounded_package_price(price * 1.7))
+    evening = min(half, max(60, rounded_package_price(price * .75)))
     return [dict(id=make_id('pkg'), name=name, duration=duration, price=cost, description=description, includes=includes)
             for name, duration, cost, description, includes in [
-                ('半日轻游', '4 小时', price, f'用半天时间，走一条不赶路的{city}本地路线。', ['一对一路线定制', '沿途讲解', '本地生活建议']),
-                ('全天深度游', '8 小时', max(80, math.floor(price * 1.7 / 10 + .5) * 10), f'从早到晚慢慢逛，把{city}的日常与风景一次收进旅程。', ['全天行程定制', '路线陪同', '餐饮与交通建议']),
-                ('傍晚轻陪游', '3 小时', max(60, math.floor(price * .75 / 10 + .5) * 10), '下班后的城市散步，适合差旅途中偷得半日闲。', ['夜间路线', '拍照协助', '本地宵夜推荐'])]]
+                ('半日轻游', '4 小时', half, f'用半天时间，走一条不赶路的{city}本地路线。', ['一对一路线定制', '沿途讲解', '本地生活建议']),
+                ('全天深度游', '8 小时', full, f'从早到晚慢慢逛，把{city}的日常与风景一次收进旅程。', ['全天行程定制', '路线陪同', '餐饮与交通建议']),
+                ('傍晚轻陪游', '3 小时', evening, '下班后的城市散步，适合差旅途中偷得半日闲。', ['夜间路线', '拍照协助', '本地宵夜推荐'])]]
 
 
 class Handler(BaseHTTPRequestHandler):

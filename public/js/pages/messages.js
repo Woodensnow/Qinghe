@@ -4,6 +4,12 @@ import { replaceUrl } from '../router.js?v=1.7.0';
 import { session } from '../session.js?v=1.7.0';
 import { avatar, escapeHTML, icon, initReveals, setPageTitle, toast } from '../ui.js?v=1.7.0';
 
+/** A poll is stale when it lacks a message the screen already shows (for example one just sent). */
+export function incomingTranscriptIsStale(localMessages, remoteMessages) {
+  const remoteIds = new Set(remoteMessages.map((message) => message.id));
+  return localMessages.some((message) => !remoteIds.has(message.id));
+}
+
 function messageTime(iso, withDate = false) {
   if (!iso) return '';
   const date = new Date(iso);
@@ -95,6 +101,7 @@ export function renderMessages(root, route) {
   let messages = [];
   let timer = null;
   let loadingThread = false;
+  let viewToken = 0;
 
   const stopTimer = () => {
     if (timer) clearInterval(timer);
@@ -217,6 +224,7 @@ export function renderMessages(root, route) {
           body: { body: text }
         });
         messages.push(result.message);
+        viewToken += 1;
         activeConversation = result.conversation;
         const index = conversations.findIndex((conversation) => conversation.id === activeId);
         if (index >= 0) {
@@ -247,36 +255,46 @@ export function renderMessages(root, route) {
 
   const startPolling = () => {
     stopTimer();
-    timer = setInterval(async () => {
-      if (!activeId || loadingThread) return;
-      try {
-        const result = await api(`/api/conversations/${encodeURIComponent(activeId)}/messages`);
-        const last = messages[messages.length - 1];
-        const incoming = result.messages[result.messages.length - 1];
-        if (result.messages.length !== messages.length || incoming?.id !== last?.id) {
-          const draft = threadEl.querySelector('textarea[name="body"]')?.value || '';
-          const hadFocus = document.activeElement === threadEl.querySelector('textarea[name="body"]');
-          messages = result.messages;
-          activeConversation = result.conversation;
-          renderThread();
-          const nextInput = threadEl.querySelector('textarea[name="body"]');
-          if (nextInput && draft) {
-            nextInput.value = draft;
-            nextInput.style.height = `${Math.min(nextInput.scrollHeight, 120)}px`;
-            if (hadFocus) nextInput.focus();
-          }
-          const index = conversations.findIndex((conversation) => conversation.id === activeId);
-          if (index >= 0) conversations[index] = { ...conversations[index], ...result.conversation, unread: 0 };
-          renderList();
-        }
-      } catch {
-        /* 静默轮询失败，不打扰阅读 */
-      }
+    timer = setInterval(() => {
+      pollTranscript();
     }, 4000);
+  };
+
+  const pollTranscript = async () => {
+    if (!activeId || loadingThread) return;
+    const token = viewToken;
+    const conversationId = activeId;
+    try {
+      const result = await api(`/api/conversations/${encodeURIComponent(conversationId)}/messages`);
+      if (token !== viewToken || conversationId !== activeId || loadingThread) return;
+      if (incomingTranscriptIsStale(messages, result.messages)) return;
+      const last = messages[messages.length - 1];
+      const incoming = result.messages[result.messages.length - 1];
+      if (result.messages.length !== messages.length || incoming?.id !== last?.id) {
+        const draft = threadEl.querySelector('textarea[name="body"]')?.value || '';
+        const hadFocus = document.activeElement === threadEl.querySelector('textarea[name="body"]');
+        messages = result.messages;
+        activeConversation = result.conversation;
+        renderThread();
+        const nextInput = threadEl.querySelector('textarea[name="body"]');
+        if (nextInput && draft) {
+          nextInput.value = draft;
+          nextInput.style.height = `${Math.min(nextInput.scrollHeight, 120)}px`;
+          if (hadFocus) nextInput.focus();
+        }
+        const index = conversations.findIndex((conversation) => conversation.id === activeId);
+        if (index >= 0) conversations[index] = { ...conversations[index], ...result.conversation, unread: 0 };
+        renderList();
+      }
+    } catch {
+      /* 静默轮询失败，不打扰阅读 */
+    }
   };
 
   const selectConversation = async (id, { updateUrl = true } = {}) => {
     if (!id) return;
+    viewToken += 1;
+    const token = viewToken;
     activeId = id;
     loadingThread = true;
     stopTimer();
@@ -286,7 +304,7 @@ export function renderMessages(root, route) {
     if (updateUrl) replaceUrl(`/messages?conversation=${encodeURIComponent(id)}`);
     try {
       const result = await api(`/api/conversations/${encodeURIComponent(id)}/messages`);
-      if (activeId !== id) return;
+      if (token !== viewToken || activeId !== id) return;
       messages = result.messages;
       activeConversation = result.conversation;
       const index = conversations.findIndex((conversation) => conversation.id === id);

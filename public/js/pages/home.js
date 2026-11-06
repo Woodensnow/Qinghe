@@ -9,9 +9,12 @@ import {
   escapeHTML,
   icon,
   initReveals,
+  isBookableDate,
   localDateISO,
+  maxTripDateISO,
   setPageTitle,
-  toast
+  toast,
+  writeTripDate
 } from '../ui.js?v=1.7.0';
 
 function trackCards(meta) {
@@ -143,7 +146,7 @@ export function renderHome(root) {
           </label>
           <label class="search-field">
             <span>${icon('calendar')} 出发日期</span>
-            <input type="date" name="date" min="${localDateISO()}" value="${localDateISO(addDays(1))}">
+            <input type="date" name="date" min="${localDateISO()}" max="${maxTripDateISO()}" value="${localDateISO(addDays(1))}">
           </label>
           <label class="search-field">
             <span>${icon('walk')} 服务类型</span>
@@ -308,15 +311,16 @@ export function renderHome(root) {
     event.preventDefault();
     const city = form.elements.city.value;
     const date = form.elements.date.value;
+    if (date && !isBookableDate(date)) {
+      toast('出发日期需要在今天起 180 天内', 'error');
+      form.elements.date.focus();
+      return;
+    }
     const params = new URLSearchParams();
     if (city) params.set('city', city);
     if (date) {
       params.set('date', date);
-      try {
-        sessionStorage.setItem('qinghe_trip_date', date);
-      } catch {
-        /* noop */
-      }
+      writeTripDate(date);
     }
     navigate(`/guides${params.toString() ? `?${params}` : ''}`);
   });

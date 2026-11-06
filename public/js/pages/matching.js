@@ -3,7 +3,7 @@ import { session } from '../session.js?v=1.7.0';
 import { openAuthModal } from '../components/auth-modal.js?v=1.7.0';
 import { appState } from '../state.js?v=1.7.0';
 import { navigate } from '../router.js?v=1.7.0';
-import { escapeHTML as e, cityOptionsHTML, localDateISO, setPageTitle, toast } from '../ui.js?v=1.7.0';
+import { escapeHTML as e, cityOptionsHTML, localDateISO, maxTripDateISO, setPageTitle, toast } from '../ui.js?v=1.7.0';
 
 const checks = (name, values, chosen = []) => `<div class="match-checks">${values.map(v => `<label><input type="checkbox" name="${name}" value="${e(v)}" ${chosen.includes(v) ? 'checked' : ''}> ${e(v)}</label>`).join('')}</div>`;
 const field = (label, content) => `<label class="field"><span class="field-label">${label}</span>${content}</label>`;
@@ -39,7 +39,7 @@ export async function renderMatching(root) {
           <h2>这次想怎么玩？</h2>
           <div class="form-grid form-grid--two">
             ${field('目的地', `<select name="city" required>${cityOptionsHTML(catalog.cityGroups, t.city || '', { allLabel: '选择城市' })}</select>`)}
-            ${field('日期', `<input name="date" type="date" min="${localDateISO()}" value="${e(t.date || localDateISO())}" required>`)}
+            ${field('日期', `<input name="date" type="date" min="${localDateISO()}" max="${maxTripDateISO()}" value="${e(t.date || localDateISO())}" required>`)}
             ${field('开始时间', `<select name="time">${['09:00','10:00','11:00','13:00','14:00','15:00','16:00','17:00','18:00','19:00'].map(v => `<option ${v === (t.time || '10:00') ? 'selected' : ''}>${v}</option>`).join('')}</select>`)}
             ${field('套餐时长', `<select name="hours">${[3,4,8].map(v => `<option value="${v}" ${v === (t.hours || 4) ? 'selected' : ''}>${v} 小时</option>`).join('')}</select>`)}
             ${field('同行人数', `<input name="people" type="number" min="1" max="8" value="${t.people || 2}" required>`)}
