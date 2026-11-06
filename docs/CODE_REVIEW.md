@@ -18,7 +18,7 @@ The optimization extension retains the initial checkpoint, failed exploratory ex
 
 - JSON and the lock support one local process, not a distributed service; uploads and JSON updates are not one transaction.
 - Availability checking prevents one user's duplicate booking; it is not a complete provider scheduling system.
-- The sample AI polish feature uses rules. Do not present it as a generative model integration.
+- AI polish uses the local rule engine by default. Remote models (OpenAI-compatible, Claude) are optional and only active when configured through environment variables; tests use local stub servers, not real model APIs.
 - Password hashing is intentionally expensive and serialized API operations can delay parallel requests. Tests check integrity, not high-load performance.
 - No external CI result or independent user study has yet been provided.
 

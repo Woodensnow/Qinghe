@@ -129,6 +129,68 @@ python -m venv .venv
 
 当前为三个独立种子的小模型集成，每个含 1 层 Transformer、1 层异构图传播、四个显式相容性输入和两个评分头，总计约 5.5 万参数。当前只在合成偏好数据上训练，分数不是接受概率，也没有真实推荐效果验证。详情、训练数据和评估边界见 [匹配算法说明](docs/MATCHING.md)。
 
+## AI 润色模型接入
+
+AI 润色默认使用内置的本地规则引擎（`local`），**不配置任何东西网站也能正常润色**。需要更好的效果时，可以通过环境变量接入外部大模型，不用改代码。
+
+| 环境变量 | 说明 | 默认值 |
+| --- | --- | --- |
+| `QINGHE_POLISH_PROVIDER` | 提供方：`local` / `openai`（任何 OpenAI 兼容接口）/ `anthropic`（Claude 原生接口） | `local` |
+| `QINGHE_POLISH_MODEL` | 模型名，外部提供方必填 | — |
+| `QINGHE_POLISH_BASE_URL` | 接口根地址（不含 `/chat/completions`） | `openai`：`https://api.openai.com/v1`；`anthropic`：`https://api.anthropic.com/v1` |
+| `QINGHE_POLISH_API_KEY` | API 密钥，**只能**放在环境变量里 | — |
+| `QINGHE_POLISH_API_KEY_ENV` | 想沿用已有变量时，填它的名字，例如 `ANTHROPIC_API_KEY` | `QINGHE_POLISH_API_KEY` |
+| `QINGHE_POLISH_TIMEOUT` | 单次网络读写超时（秒） | `20` |
+| `QINGHE_POLISH_FALLBACK` | 外部模型失败时：`local` 自动改用本地引擎；`off` 直接返回错误 | `local` |
+| `QINGHE_POLISH_OPTIONS` | 合并进请求体的 JSON，例如 `{"temperature": 0.7}` | `{}` |
+| `QINGHE_POLISH_CONFIG` | 配置文件路径 | `server/ai_polish.local.json` |
+
+常见示例（设置后用 `./start.sh` 启动即可）：
+
+```bash
+# 本地 Ollama（OpenAI 兼容接口，无需密钥）
+export QINGHE_POLISH_PROVIDER=openai QINGHE_POLISH_BASE_URL=http://localhost:11434/v1 QINGHE_POLISH_MODEL=qwen2.5:7b
+```
+
+```bash
+# Claude（原生 Messages API）
+export QINGHE_POLISH_PROVIDER=anthropic QINGHE_POLISH_MODEL=claude-haiku-5-5 QINGHE_POLISH_API_KEY_ENV=ANTHROPIC_API_KEY
+```
+
+```bash
+# OpenAI 或其他兼容服务（DeepSeek、vLLM 等只需换 BASE_URL 和模型名）
+export QINGHE_POLISH_PROVIDER=openai QINGHE_POLISH_MODEL=你的模型名 QINGHE_POLISH_API_KEY=你的密钥
+```
+
+不想每次 `export` 时，可以把**非密钥**设置写进 `server/ai_polish.local.json`（已被 `.gitignore` 和打包脚本排除），环境变量优先级更高。文件里出现 `api_key`、`token` 等密钥字段会被拒绝：
+
+```json
+{"provider": "openai", "base_url": "http://localhost:11434/v1", "model": "qwen2.5:7b", "timeout": 30}
+```
+
+接口行为：
+
+- 请求格式不变；响应仍有 `text` 和 `engine`，并新增 `provider`、`model`。外部模型失败并回退本地引擎时，响应带 `fallbackFrom`（原提供方名），服务端日志记录原因（不记录密钥和用户原文）。
+- `QINGHE_POLISH_FALLBACK=off` 时，配置错误返回 503，超时返回 504，其他失败返回 502。
+- 模型输出会去掉代码块、引号、`<think>` 等包装，并按场景字数上限（简介 160 / 地陪介绍 600）裁剪。
+- 调用模型期间不占用全局数据锁，慢模型不会卡住网站其他请求。
+
+新增提供方只需在 `server/polish_providers.py` 里写一个类并注册：
+
+```python
+@register('my-model')
+class MyProvider(PolishProvider):
+    default_base_url = 'https://example.com/v1'
+    needs_key = True
+
+    def polish(self, request):          # request.text / scene / city / variant / limit
+        result = self.post_json('/generate', {'model': self.model, 'prompt': system_prompt(request) + request.text},
+                                {'Authorization': 'Bearer ' + self.settings.api_key})
+        return result['output']         # 返回原始文本；清理、裁剪、超时和错误处理由统一入口负责
+```
+
+---
+
 ## 功能清单
 
 ### 登录 / 注册
@@ -197,7 +259,7 @@ python -m venv .venv
 - **前端**：原生 HTML + CSS + ES Modules，无打包步骤，无运行时依赖
 - **后端**：Python 标准库 `http.server`；基础功能零第三方依赖；神经匹配使用 PyTorch / NumPy
 - **数据**：`server/data.json` 文件持久化（不是数据库）
-- **AI 润色**：默认使用本地轻量文本引擎，不依赖外部 API Key，保留原意并优化标点、节奏与表达；`server/ai_polish.py` 可独立替换为真实大模型调用
+- **AI 润色**：默认使用本地轻量文本引擎，不依赖外部 API Key，保留原意并优化标点、节奏与表达；可通过环境变量接入 OpenAI 兼容接口、Ollama、Claude 等模型，见 [AI 润色模型接入](#ai-润色模型接入)
 - **上传**：本地图片压缩后写入 `public/uploads/`，用户资料中保存文件地址
 - **图片安全**：仅接受 JPG / PNG / WebP，校验文件头、限制 5MB，不使用可执行 SVG
 - **封面导入**：成为地陪时可直接从本地相册导入封面，客户端自动压缩后上传，服务端校验文件存在后写入服务
@@ -259,6 +321,7 @@ qinghe/
     ├── models/              # 教学模型权重与训练报告
     ├── auth_utils.py         # scrypt / token
     ├── ai_polish.py          # 本地文本润色引擎
+    ├── polish_providers.py   # 润色提供方接口、配置与外部模型接入
     └── data.json             # 业务数据，首次启动自动生成
 ```
 
@@ -276,7 +339,7 @@ qinghe/
 | GET | `/api/conversations/:id/messages` | 会话消息，并标记已读（需登录） |
 | POST | `/api/conversations/:id/messages` | 发送私聊消息（需登录） |
 | GET | `/api/messages/unread` | 当前用户未读总数（需登录） |
-| POST | `/api/ai/polish` | 对个人简介 / 地陪介绍进行 AI 润色（需登录） |
+| POST | `/api/ai/polish` | 对个人简介 / 地陪介绍进行 AI 润色，响应注明实际使用的 `provider` / `model`（需登录） |
 | POST | `/api/profile/photo` | 上传头像 / 封面 / 照片（需登录） |
 | DELETE | `/api/profile/photo` | 移除头像 / 封面 / 照片（需登录） |
 | GET | `/api/meta` | 城市、服务、语言、封面、演示账号等元信息 |
@@ -303,6 +366,7 @@ qinghe/
 - 这是一个完整的可交互演示项目，**不是生产级交易系统**。
 - 没有接入数据库；用户、登录会话、地陪服务、预约、私聊会话与消息保存在 `server/data.json`，上传的图片保存在 `public/uploads/`。重启服务后数据仍在。
 - 密码使用 `scrypt` 加盐哈希，接口不会返回密码哈希或盐。
+- AI 润色的 API 密钥只从环境变量读取，不写入代码、配置文件或仓库。
 - 演示版未接入短信验证、邮件验证、支付、地图、实名认证和对象存储。
 - 私聊当前使用 HTTP 轮询模拟实时消息，正式版建议替换为 WebSocket 或消息队列。
 - 正式上线前至少需要：数据库、对象存储、HTTPS、严格的频控与风控、实名认证、支付与退款、隐私合规、内容审核。

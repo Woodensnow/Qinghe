@@ -1,6 +1,8 @@
 """Local punctuation and expression polishing; no remote model required."""
 import re
 
+LIMITS = {'guide': 600, 'profile': 160}
+
 
 def polish_text(text, context='profile', city='', variant=0):
     value = re.sub(r'\r\n?', '\n', text).strip()
@@ -48,9 +50,13 @@ def polish_text(text, context='profile', city='', variant=0):
             value += '\n\n' + closings[(index + 1) % 3]
     elif len(value) < 105 and not re.search('希望|期待|欢迎|聊聊|遇见', value):
         value += '\n\n' + ['希望在这里遇见同样热爱生活的人。', '如果你也喜欢这样的节奏，也许我们可以聊聊。', '期待把日常里的小发现，分享给同样好奇的你。'][index]
-    limit = 600 if context == 'guide' else 160
-    if len(value) > limit:
-        value = value[:limit]
-        cut = max(value.rfind(c) for c in '。！？')
-        value = value[:cut + 1] if cut >= int(limit * .55) else value[:limit - 1].rstrip('，、；： \n') + '。'
-    return value
+    return clip_text(value, LIMITS.get(context, LIMITS['profile']))
+
+
+def clip_text(value, limit):
+    """Cut to limit characters, preferring to end on a full sentence."""
+    if len(value) <= limit:
+        return value
+    value = value[:limit]
+    cut = max(value.rfind(c) for c in '。！？')
+    return value[:cut + 1] if cut >= int(limit * .55) else value[:limit - 1].rstrip('，、；： \n') + '。'

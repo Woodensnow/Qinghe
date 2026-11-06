@@ -50,6 +50,7 @@ Tests require permission to connect to loopback TCP ports. They use temporary da
 | Images / polish | Upload/delete each profile image type; avatar propagation; invalid file signatures; bounded polish output |
 | Static / metadata | SPA fallback, JavaScript delivery, traversal rejection, missing asset, HEAD, security headers |
 | Concurrency | Sixteen concurrent chat sends are all present after storage reload |
+| AI polish providers | Config parsing and key rules; registering a fake provider; output cleaning and limits; OpenAI-compatible and Anthropic requests against local stub servers; timeouts, bad responses and fallback; a slow model does not block other requests (`tests/test_polish_providers.py`) |
 | Launcher / reset | Fresh project copy initializes, resets only its own uploads, serves health and refuses reset while running |
 
 The file `.github/workflows/tests.yml` configures GitHub Actions for Python 3.10 / 3.12 on Linux / Windows. Configuration is not a successful CI run; attach actual job results after pushing to a group-owned repository.

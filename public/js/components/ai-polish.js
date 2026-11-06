@@ -47,7 +47,12 @@ export function openPolishModal({ text, scene, city = '', onApply }) {
     body.querySelector('[data-ai-retry]')?.addEventListener('click', run);
   };
 
-  const renderResult = (polished) => {
+  const engineLabel = ({ provider, model }) => {
+    if (!provider || provider === 'local') return '本地 AI 润色引擎';
+    return `${provider}${model ? ` · ${model}` : ''} 模型润色`;
+  };
+
+  const renderResult = (polished, result = {}) => {
     body.innerHTML = `<div class="ai-result">
       <div class="ai-result-head">
         <span>润色后</span>
@@ -62,7 +67,7 @@ export function openPolishModal({ text, scene, city = '', onApply }) {
         <button type="button" class="btn btn--primary" data-ai-apply>替换原文 ${icon('check')}</button>
         <button type="button" class="btn btn--ghost" data-ai-retry>再润色一次 ${icon('sparkles')}</button>
       </div>
-      <span class="ai-note">${icon('leaf')} 本地 AI 润色引擎 · 不会替你编造新的经历</span>
+      <span class="ai-note">${icon('leaf')} ${escapeHTML(engineLabel(result))} · 不会替你编造新的经历</span>
     </div>`;
     body.querySelector('[data-ai-apply]')?.addEventListener('click', () => {
       if (typeof onApply === 'function') onApply(polished);
@@ -84,7 +89,7 @@ export function openPolishModal({ text, scene, city = '', onApply }) {
         method: 'POST',
         body: { text: source, scene, city, variant }
       });
-      renderResult(result.text);
+      renderResult(result.text, result);
     } catch (error) {
       renderError(error instanceof ApiError ? error.message : '请稍后再试');
     } finally {

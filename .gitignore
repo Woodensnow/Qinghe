@@ -13,3 +13,9 @@ __pycache__/
 .venv/
 server/data.json.tmp
 output/
+
+# Local AI polish config and env files (API keys stay in environment variables)
+server/ai_polish.local.json
+*.local.json
+.env
+.env.*

@@ -1,3 +1,46 @@
+# AI 润色：可接入多种模型的统一接口
+
+现状（2026-11-06 检查）：
+- `server/ai_polish.py` 只有本地规则引擎 `polish_text`，长度裁剪逻辑写在函数末尾
+- `POST /api/ai/polish` 直接调用 `polish_text`，固定返回 `engine='local'`
+- 前端弹窗固定显示「本地 AI 润色引擎」；测试断言 `engine == 'local'`
+
+设计：
+- 新模块 `server/polish_providers.py`：
+  - `PolishRequest`（text / scene / city / variant / limit）与 `PolishResult`（text / provider / model / fallbackFrom）
+  - `PolishProvider` 基类 + `@register('名字')` 注册表；新增提供方 = 写一个类并注册
+  - 统一错误：`PolishError` → `ProviderConfigError` / `ProviderTimeout` / `ProviderResponseError`
+  - 统一后处理：去掉代码块和包裹引号、空结果视为失败、按场景字数上限裁剪（与本地引擎共用 `clip_text`）
+  - 内置提供方：`local`（默认，包装现有引擎）、`openai`（OpenAI 兼容 `/chat/completions`，覆盖 OpenAI / Ollama / DeepSeek / Claude 兼容端点等）、`anthropic`（Claude 原生 Messages API）；HTTP 只用 `urllib`
+- 配置：环境变量优先，其次可选 JSON 文件（默认 `server/ai_polish.local.json`，可用 `QINGHE_POLISH_CONFIG` 指定）
+  - `QINGHE_POLISH_PROVIDER / _MODEL / _BASE_URL / _TIMEOUT / _FALLBACK / _API_KEY_ENV`
+  - 密钥只从环境变量读取（默认 `QINGHE_POLISH_API_KEY`）；配置文件里出现密钥字段直接报配置错误
+  - 每次请求读取配置，改配置无需改代码
+- 失败策略：外部提供方出错（配置错误、超时、网络、响应异常）默认回退本地引擎，响应带 `fallbackFrom`；`QINGHE_POLISH_FALLBACK=off` 时返回 502/503/504 和中文提示；日志不打印密钥和用户原文
+- 对外接口兼容：请求不变，响应保留 `text`、`engine`，新增 `provider`、`model`
+
+计划：
+- [x] 阅读现有实现与测试
+- [x] `ai_polish.py` 抽出 `clip_text`（行为不变）
+- [x] 新建 `polish_providers.py`（抽象、注册表、配置、三个提供方、回退）
+- [x] `server.py` 路由改用统一入口，响应加 `provider` / `model`
+- [x] 前端弹窗按 `provider` / `model` 显示实际引擎
+- [x] `.gitignore` 与打包脚本排除本地配置文件
+- [x] 测试：假提供方注册、配置解析与密钥规则、本地桩 HTTP 服务（OpenAI 兼容 / Anthropic）、超时、错误回退、关闭回退时的 HTTP 状态；测试夹具清空 `QINGHE_POLISH_*` 环境变量
+- [x] README 配置说明（并同步 docs 中「润色只是规则」的描述）
+- [x] 运行全部测试
+
+## 结果（2026-11-06）
+- 新增 `server/polish_providers.py`：`local`（默认）/ `openai`（OpenAI 兼容）/ `anthropic`（Claude Messages API），新增提供方 = 一个类 + `@register`
+- 润色路由移出全局数据锁，只在校验登录时持锁；反向验证：放回锁内时「慢模型不阻塞」测试失败（等待 5 秒）
+- 外部模型失败默认回退本地并返回 `fallbackFrom`；`QINGHE_POLISH_FALLBACK=off` 时返回 502 / 503 / 504
+- 全部 64 个测试通过（原 46 + 新增 18）；另用真实服务进程 + 本地桩模型做了端到端检查（本地 / 模型 / 连不上回退三种情况）
+- 小变化：`GET /api/ai/polish` 由 404 变为 405
+- 未覆盖：没有调用任何真实外部模型；超时是单次网络读写超时，不是整体时限
+
+
+---
+
 # Transformer 文本编码修复与重训（v4）
 
 问题（2026-11-05 检查）：

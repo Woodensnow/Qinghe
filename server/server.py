@@ -14,7 +14,8 @@ from pathlib import Path
 from urllib.parse import parse_qs, unquote, urlsplit
 
 from auth_utils import hash_password, verify_password, make_id, make_token
-from ai_polish import polish_text
+from ai_polish import LIMITS
+from polish_providers import PolishError, polish
 from pricing import quote
 from store import data, save, LOCK, ROOT, now_iso
 
@@ -205,10 +206,29 @@ class Handler(BaseHTTPRequestHandler):
             check(user, '请先登录', status=401)
         return user
 
+    def polish_route(self):
+        check(self.command == 'POST', '请求方式不支持', status=405)
+        with LOCK:
+            self.current_user()
+        body = self.read_body()
+        scene, value = text(body.get('scene'), 20), str(body.get('text') or '').strip()
+        limit = LIMITS.get(scene)
+        check(limit, '润色场景不正确')
+        check(len(value) >= 6, '先写几句完整的话，AI 才有素材可以润色', 'text')
+        check(len(value) <= limit, f'这段文字不能超过 {limit} 个字', 'text')
+        try:
+            result = polish(value, scene, text(body.get('city'), 20), number(body.get('variant')))
+        except PolishError as error:
+            raise ApiError(error.status, error.message)
+        return 200, result.to_json()
+
     def dispatch(self):
         try:
             url = urlsplit(self.path)
-            if url.path.startswith('/api/'):
+            if url.path == '/api/ai/polish':
+                # Model calls can be slow, so only the login check holds the store lock.
+                self.respond(*self.polish_route())
+            elif url.path.startswith('/api/'):
                 # A complete read/modify/save cycle is serialized, matching the old
                 # single-process store and preventing lost updates between requests.
                 with LOCK:
@@ -378,16 +398,6 @@ class Handler(BaseHTTPRequestHandler):
                 save()
                 return 201, dict(message=message, conversation=conversation_view(conversation, user['id']))
             raise ApiError(405, '请求方式不支持')
-
-        if method == 'POST' and path == '/api/ai/polish':
-            self.current_user()
-            body = self.read_body()
-            scene, value = text(body.get('scene'), 20), str(body.get('text') or '').strip()
-            limit = {'guide': 600, 'profile': 160}.get(scene)
-            check(limit, '润色场景不正确')
-            check(len(value) >= 6, '先写几句完整的话，AI 才有素材可以润色', 'text')
-            check(len(value) <= limit, f'这段文字不能超过 {limit} 个字', 'text')
-            return 200, dict(text=polish_text(value, scene, text(body.get('city'), 20), number(body.get('variant'))), engine='local')
 
         if method == 'GET' and path == '/api/guides':
             user = self.current_user(False)

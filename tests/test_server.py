@@ -14,8 +14,10 @@ import tempfile
 import threading
 import unittest
 from datetime import date, timedelta
+from unittest.mock import patch
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'server'))
+import polish_providers
 import server
 import store
 from auth_utils import verify_password
@@ -31,6 +33,13 @@ class ApiFixture(unittest.TestCase):
         store._db = store.build_seed()
         store.save()
         server.UPLOADS = Path(self.temp.name) / 'uploads'
+        # Ignore any AI polish config on the developer machine; tests set their own.
+        self.env = patch.dict(os.environ, {'NO_PROXY': '*', 'no_proxy': '*'})
+        self.env.start()
+        for key in [k for k in os.environ if k.startswith('QINGHE_POLISH_')]:
+            del os.environ[key]
+        self.config = patch.object(polish_providers, 'CONFIG_FILE', Path(self.temp.name) / 'ai_polish.local.json')
+        self.config.start()
         self.http = server.ThreadingHTTPServer(('127.0.0.1', 0), server.Handler)
         self.thread = threading.Thread(target=self.http.serve_forever, daemon=True)
         self.thread.start()
@@ -40,6 +49,8 @@ class ApiFixture(unittest.TestCase):
         self.http.shutdown()
         self.http.server_close()
         self.thread.join()
+        self.config.stop()
+        self.env.stop()
         store.DATA_FILE, store._db, server.UPLOADS = self.old_file, self.old_db, self.old_uploads
         self.temp.cleanup()
 

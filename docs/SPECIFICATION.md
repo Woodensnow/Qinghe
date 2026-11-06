@@ -19,13 +19,13 @@ The required Python entry is `main.py`. The CLI can query guides, estimate packa
 | FR-07 | Service publication | Validate fields; owner may pause / resume; paused services are hidden from other users | `ApiTests.test_guide_and_two_way_chat_permissions` |
 | FR-08 | Private conversations | Only participants may view/send messages; expose role and unread counts; reading clears that participant's unread count | Same two-way chat test |
 | FR-09 | Profile and photos | Update profile; accept JPEG/PNG/WebP with size and signature checks; avatar changes propagate to owned services | Auth and photo tests |
-| FR-10 | Local text polish | Require login and scene-specific text limits; return locally processed text labelled `engine: local` | `ApiTests.test_photo_upload_validation_and_polish` |
+| FR-10 | Text polish | Require login and scene-specific text limits; use the local engine (`engine: local`) unless a model provider is configured; report `provider` / `model`, fall back to local on provider failure | `ApiTests.test_photo_upload_validation_and_polish`, `tests/test_polish_providers.py` |
 | FR-11 | Durable storage | Preserve data after reload; serialize writes to avoid lost concurrent messages | Auth reload test; `test_concurrent_messages_are_saved` |
 | FR-12 | Clean startup and reset | Serve via Python; explicit reset regenerates demo data and removes uploads; refuse reset while PID file exists | `test_launcher_and_reset_in_isolated_project` |
 
 ## 3. Architecture and data
 
-`main.py` coordinates the CLI. `server/server.py` uses `Handler` and `ThreadingHTTPServer` for HTTP requests. `pricing.py` is the single pricing rule shared by CLI and API. `auth_utils.py` handles scrypt and random credentials. `store.py` owns JSON loading, initialization and atomic replacement. `ai_polish.py` handles local text transformation. `public/js/` implements browser pages and calls the Python API.
+`main.py` coordinates the CLI. `server/server.py` uses `Handler` and `ThreadingHTTPServer` for HTTP requests. `pricing.py` is the single pricing rule shared by CLI and API. `auth_utils.py` handles scrypt and random credentials. `store.py` owns JSON loading, initialization and atomic replacement. `ai_polish.py` handles local text transformation; `polish_providers.py` defines the provider interface, configuration and optional remote model providers. `public/js/` implements browser pages and calls the Python API.
 
 `catalog.json` contains allowed cities, services, languages and covers. `seed-data.json` contains demo templates; initialization generates a fresh password salt and relative booking/chat dates. `data.json` stores users, sessions, guides, bookings, conversations and messages. Uploaded images are separate files under `public/uploads`.
 
