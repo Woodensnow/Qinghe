@@ -8,6 +8,8 @@ import random
 import re
 import signal
 import sys
+import threading
+import time
 from datetime import date, datetime, timedelta, timezone
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
@@ -146,6 +148,72 @@ def rounded_package_price(amount):
     return math.floor(amount / 10 + .5) * 10
 
 
+# A demo burst, shared by the local engine and any configured model.
+DRAFT_RATE_LIMIT = 8
+DRAFT_RATE_WINDOW = 60
+_DRAFT_HITS = {}
+_DRAFT_HITS_LOCK = threading.Lock()
+
+
+def draft_rate_settings():
+    """QINGHE_DRAFT_RATE_LIMIT requests per QINGHE_DRAFT_RATE_WINDOW seconds. Bad values keep the defaults."""
+    def read(name, default, highest):
+        raw = os.environ.get(name, '').strip()
+        if not raw:
+            return default
+        try:
+            value = int(raw)
+        except ValueError:
+            return default
+        return value if 1 <= value <= highest else default
+    return read('QINGHE_DRAFT_RATE_LIMIT', DRAFT_RATE_LIMIT, 100), read('QINGHE_DRAFT_RATE_WINDOW', DRAFT_RATE_WINDOW, 3600)
+
+
+def reset_draft_rate_limit():
+    with _DRAFT_HITS_LOCK:
+        _DRAFT_HITS.clear()
+
+
+def draft_rate_key(user, address):
+    if user and user.get('id'):
+        return 'user:' + str(user['id'])
+    host = address[0] if isinstance(address, tuple) and address else 'unknown'
+    return 'ip:' + str(host)
+
+
+def allow_draft(key, now=None):
+    """Record one draft attempt. False means this user (or IP) is over the burst."""
+    limit, window = draft_rate_settings()
+    now = time.monotonic() if now is None else now
+    with _DRAFT_HITS_LOCK:
+        expired = [bucket for bucket, stamps in _DRAFT_HITS.items() if not stamps or now - stamps[-1] >= window]
+        for bucket in expired:
+            del _DRAFT_HITS[bucket]
+        hits = [stamp for stamp in _DRAFT_HITS.get(key, ()) if now - stamp < window]
+        if len(hits) >= limit:
+            _DRAFT_HITS[key] = hits
+            return False
+        hits.append(now)
+        _DRAFT_HITS[key] = hits
+        return True
+
+
+def parse_draft_variant(body):
+    """0 when omitted. None when the value is not an integer from 0 to 20."""
+    if 'variant' not in body or body.get('variant') is None:
+        return 0
+    value = body.get('variant')
+    if isinstance(value, bool) or not isinstance(value, (int, float)):
+        return None
+    if isinstance(value, float):
+        if not math.isfinite(value) or not value.is_integer():
+            return None
+        value = int(value)
+    if not 0 <= value <= 20:
+        return None
+    return value
+
+
 def make_packages(city, price, itineraries=None):
     # Shorter packages must not cost more than longer ones. The evening floor of
     # ¥60 would otherwise exceed a half-day base of ¥50–¥59.
@@ -246,7 +314,7 @@ class Handler(BaseHTTPRequestHandler):
     def draft_route(self):
         check(self.command == 'POST', '请求方式不支持', status=405)
         with LOCK:
-            self.current_user()
+            user = self.current_user()
         body = self.read_body()
         notes = body.get('notes')
         check(isinstance(notes, str), '请写 6 到 300 字，方便生成简介和行程', 'notes')
@@ -273,13 +341,9 @@ class Handler(BaseHTTPRequestHandler):
                 package_keys.append(key)
         part = text(body.get('part', 'all'), 20)
         check(part in {'all', 'bio', 'highlights', 'itinerary'}, '生成范围不正确', 'part')
-        if 'variant' in body and body.get('variant') is not None:
-            variant = body.get('variant')
-            check(not isinstance(variant, bool) and isinstance(variant, (int, float)) and float(variant).is_integer(), '版本号不正确', 'variant')
-            variant = int(variant)
-            check(0 <= variant <= 20, '版本号不正确', 'variant')
-        else:
-            variant = 0
+        variant = parse_draft_variant(body)
+        check(variant is not None, '版本号需要是 0 到 20 的整数', 'variant')
+        check(allow_draft(draft_rate_key(user, self.client_address)), '生成太频繁，请稍后再试', status=429)
         try:
             result = draft(notes, city, chosen, package_keys, part, variant)
         except PolishError as error:

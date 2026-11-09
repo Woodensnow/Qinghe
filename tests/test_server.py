@@ -36,8 +36,9 @@ class ApiFixture(unittest.TestCase):
         # Ignore any AI polish config on the developer machine; tests set their own.
         self.env = patch.dict(os.environ, {'NO_PROXY': '*', 'no_proxy': '*'})
         self.env.start()
-        for key in [k for k in os.environ if k.startswith('QINGHE_POLISH_')]:
+        for key in [k for k in os.environ if k.startswith(('QINGHE_POLISH_', 'QINGHE_DRAFT_'))]:
             del os.environ[key]
+        server.reset_draft_rate_limit()
         self.config = patch.object(polish_providers, 'CONFIG_FILE', Path(self.temp.name) / 'ai_polish.local.json')
         self.config.start()
         self.http = server.ThreadingHTTPServer(('127.0.0.1', 0), server.Handler)
@@ -327,6 +328,34 @@ class ProfileDraftTests(ApiFixture):
         bad_time = self.request('POST', '/api/guides', self.guide_body(name='坏时间', itineraries=draft['itineraries'] | {
             'evening': [dict(node, time='下午') for node in draft['itineraries']['evening']]}))
         self.assertEqual(bad_time[0], 400)
+
+    def test_variant_must_be_a_small_integer(self):
+        self.login()
+        ok = dict(notes=NOTES, city='成都')
+        self.assertEqual(self.request('POST', '/api/ai/profile-draft', dict(ok, variant=0))[0], 200)
+        self.assertEqual(self.request('POST', '/api/ai/profile-draft', dict(ok, variant=20))[0], 200)
+        for value in (21, -1, 1.5, True, '2', 10 ** 400, 10 ** 1000):
+            status, body, _ = self.request('POST', '/api/ai/profile-draft', dict(ok, variant=value))
+            self.assertEqual(status, 400, value)
+            self.assertEqual(body['message'], '版本号需要是 0 到 20 的整数')
+            self.assertEqual(body['field'], 'variant')
+
+    def test_profile_draft_rate_limit_is_per_user(self):
+        self.login()
+        os.environ['QINGHE_DRAFT_RATE_LIMIT'] = '2'
+        os.environ['QINGHE_DRAFT_RATE_WINDOW'] = '60'
+        server.reset_draft_rate_limit()
+        body = dict(notes=NOTES, city='成都')
+        self.assertEqual(self.request('POST', '/api/ai/profile-draft', body)[0], 200)
+        self.assertEqual(self.request('POST', '/api/ai/profile-draft', body)[0], 200)
+        status, payload, _ = self.request('POST', '/api/ai/profile-draft', body)
+        self.assertEqual((status, payload['message']), (429, '生成太频繁，请稍后再试'))
+        other = self.register('other-draft@example.cn')
+        self.assertEqual(self.request('POST', '/api/ai/profile-draft', body, token=other)[0], 200)
+        self.assertEqual(server.draft_rate_key(None, ('203.0.113.9', 5000)), 'ip:203.0.113.9')
+        self.assertTrue(server.allow_draft('ip:203.0.113.9'))
+        self.assertTrue(server.allow_draft('ip:203.0.113.9'))
+        self.assertFalse(server.allow_draft('ip:203.0.113.9'))
 
 
 if __name__ == '__main__':

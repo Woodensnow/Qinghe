@@ -83,3 +83,7 @@
 - 本地引擎对示例原文抽出「人民公园」「玉林路」，不写鹤鸣茶社、宽窄巷子；模型输出对不上就回退，并带 `fallbackFrom`
 - `python3 -m unittest discover -s tests -v`：81 项通过，12 项因未安装 PyTorch 跳过（原 65 + 新增 16）
 - 本 PR 只有后端。发布页按钮和详情页时间线留给前端 PR
+
+## 审核跟进（2026-11-09）
+- [x] `POST /api/ai/profile-draft` 按用户限流（无用户 id 时按 IP），默认 60 秒 8 次，可用 `QINGHE_DRAFT_RATE_LIMIT` / `QINGHE_DRAFT_RATE_WINDOW` 调整；超出返回 429。本地引擎和外部模型共用额度
+- [x] `variant` 不再把超大整数转成 float。不是 0–20 的整数时返回 400，而不是 500
