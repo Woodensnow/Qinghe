@@ -1,399 +1,407 @@
-# 青禾 · 城市轻兼职
+<p align="center">
+  <img src="./public/favicon.svg" width="72" alt="青禾 Qinghe">
+</p>
 
-> 找位本地人，陪你慢慢逛。也把你的闲暇时间，变成一段新的旅程。
+<h1 align="center">青禾 · Qinghe</h1>
 
-青禾是一个面向个人兼职与城市服务的双端网站：旅人可以找到懂城市的本地地陪，熟悉城市的人也可以发布自己的地陪服务，赚取一份时间自由的副业收入。
+<p align="center">
+  找位本地人，陪你慢慢逛。<br>
+  Find a local, and wander the city slowly.
+</p>
 
-城市覆盖已从 6 个扩展到 **34 个省级行政区、151 座城市**，包含省会、直辖市与热门旅行目的地。当前版本重点打磨 **地陪** 板块。摄影、模特、博物馆讲解员、NPC 作为后续板块，已在首页与页脚中以「即将开放」的形式预留入口。
+<p align="center">
+  <img alt="Python 3.10+" src="https://img.shields.io/badge/Python-3.10%2B-3776AB?logo=python&logoColor=white">
+  <img alt="EdUHK INT6181" src="https://img.shields.io/badge/EdUHK-INT6181-2F6F57">
+</p>
 
-![青禾首页预览](./preview/home-hero.jpg)
+青禾是香港教育大学 INT6181 的课程项目。旅人可以预约本地地陪，熟悉城市的人也可以发布自己的服务。现在能用的是地陪：浏览、预约、私聊，以及下面的 AI 功能。
 
-![地陪详情页预览](./preview/guide-detail.jpg)
+Qinghe is a course project for EdUHK INT6181. Travellers book a local guide. People who know a city can publish their own service. What works today is the guide service: browse, book, chat, and the AI features below.
 
-![个人资料与本地照片](./preview/profile.jpg)
+## 目录 / Contents
 
-![头像修改与本地头像上传](./preview/avatar-edit.jpg)
+- [快速开始 / Quick start](#快速开始--quick-start)
+- [能做什么 / What it does](#能做什么--what-it-does)
+- [怎么搭的 / How it is built](#怎么搭的--how-it-is-built)
+- [AI](#ai)
+- [测试 / Tests](#测试--tests)
+- [参考 / Reference](#参考--reference)
 
-![AI 文本润色](./preview/ai-polish.jpg)
+## 快速开始 / Quick start
 
-![地陪封面本地导入](./preview/cover-import.jpg)
+需要 **Python 3.10** 或更高版本。预约和私聊只用 Python 自带的库，不用再安装别的。
 
-![私聊消息中心](./preview/messages.jpg)
+You need **Python 3.10** or newer. Booking and chat use only Python’s own libraries. Nothing else to install.
 
----
+| 系统 / System | 启动 / Start |
+| --- | --- |
+| Windows | 双击 `start.bat`，或运行 `.\start.ps1`。 Double-click `start.bat`, or run `.\start.ps1`. |
+| macOS / Linux | 运行 `bash start.sh`。 Run `bash start.sh`. |
 
-## 课程提交入口
+也可以直接运行 `python main.py --serve`。macOS / Linux 如果 `python` 不可用，就用 `python3`。
 
-INT6181 要求的 Python 入口是 `main.py`。在标准 Python 3.10+ 环境运行：
+You can also run `python main.py --serve`. On macOS / Linux, use `python3` when `python` is not available.
 
-```bash
-python main.py
+打开 <http://127.0.0.1:4173>。终端不要关。按 **Ctrl+C** 停止。macOS / Linux 也可以运行 `bash stop.sh`。
+
+Open <http://127.0.0.1:4173>. Leave the terminal open. Press **Ctrl+C** to stop. On macOS / Linux, `bash stop.sh` also works.
+
+默认地址是 `127.0.0.1:4173`。用 `HOST` 和 `PORT` 修改。用 `PYTHON_BIN` 指定用哪一个 Python。端口被占用时会启动失败。不要同时开两个服务去改同一份数据。
+
+The default address is `127.0.0.1:4173`. Change it with `HOST` and `PORT`. Set `PYTHON_BIN` to pick a Python program. Startup fails if the port is already taken. Do not run two servers on the same data.
+
+**演示账号 / Demo account：** `demo@qinghe.cn`，密码 `qinghe123`。登录框里也可以点「一键体验」。里面已有一条已确认的上海预约、一条已完成的杭州预约、一条暂停的服务、一份个人资料，以及两段私聊。
+
+**Demo account:** `demo@qinghe.cn`, password `qinghe123`. You can also click 一键体验 in the login dialog. It already has a confirmed Shanghai booking, a completed Hangzhou booking, one paused service, a profile, and two chats.
+
+**命令行 / Command line：** 不带参数运行 `python main.py`，会进入菜单：查地陪、算报价、开网站、跑测试。报价不会创建预约。
+
+**Command line:** `python main.py` with no arguments opens a menu: look up guides, estimate a price, start the site, or run tests. An estimate does not create a booking.
+
+**重置 / Reset：** 先停掉服务，再运行 `python main.py --reset`。Windows 也可以用 `.\start.ps1 --reset`。这会清空用户、预约、私聊和上传的图片，并恢复演示数据。如果留下 `server/server.pid`，先确认服务已经关闭，再删掉这个文件。
+
+**Reset:** Stop the server, then run `python main.py --reset`. On Windows, `.\start.ps1 --reset` also works. This clears users, bookings, chats, and uploaded images, and restores the demo data. If `server/server.pid` is left behind, delete it only after the server has stopped.
+
+## 能做什么 / What it does
+
+| | 中文 | English |
+| --- | --- | --- |
+| 🗺️ 地陪 | 在 151 座城市里搜索、看套餐、预约。人数 1–8。超过 4 人，每人加 ¥60。 | Search 151 cities, pick a package, and book for 1–8 people. Above 4 people, each extra person adds ¥60. |
+| 📝 发布 | 发布地陪服务，也可以暂停或恢复接单。预置 6 位地陪，演示账号另有 1 条暂停的服务。 | Publish a guide service, then pause or resume it. Six sample guides are included, plus one paused service on the demo account. |
+| 💬 私聊 | 旅人和地陪在站内聊天，大约每 4 秒看一次新消息。 | Travellers and guides chat on the site. New messages are checked about every 4 seconds. |
+| 🖼️ 资料 | 头像、封面，以及最多 6 张照片。简介可以先预览，再决定要不要换成润色后的文字。 | An avatar, a cover, and up to 6 photos. You can preview a polished bio before keeping it. |
+| 🤝 匹配 | 双方填好偏好后，给出双向推荐。需要额外安装，见下方 AI。 | After both sides fill in preferences, the site suggests matches both ways. Extra install; see AI below. |
+
+摄影、模特、博物馆讲解员、NPC 只出现在页面预告里，现在还不能用。
+
+Photography, modelling, museum guides, and NPC only appear as previews. They cannot be used yet.
+
+![青禾首页 / Qinghe home](./preview/home-hero.jpg)
+
+## 怎么搭的 / How it is built
+
+页面是浏览器里的 HTML、CSS 和 JavaScript，不用打包。接口是 Python 自带的网页服务。数据写在 `server/data.json`，不是数据库。上传的图片放在 `public/uploads/`。
+
+The pages are HTML, CSS, and JavaScript in the browser. There is no build step. The API is Python’s built-in web server. Data is stored in `server/data.json`, not a database. Uploaded images go in `public/uploads/`.
+
+```mermaid
+flowchart LR
+  browser["浏览器 Browser"] --> api["Python 接口 API"]
+  api --> data["data.json"]
+  api --> draft["润色与行程草稿"]
+  api --> match["双边匹配"]
 ```
 
-进入命令行菜单，可查询地陪、选择套餐并计算 1–8 人报价、启动完整网页服务、运行测试。非法选项和人数会显示提示；EOF 或 Ctrl+C 可退出。查询和估价不创建预约。CLI 查询使用 JSON 文件输入，报价执行实际业务计算；完整账号、预约和私聊在浏览器界面完成。
+密码用加盐的 scrypt 保存，接口不返回密码。登录后的令牌大约 7 天内有效。
 
-课程要求对照、规格、测试、代码评审和展示提纲见 [课程对照清单](docs/COURSE_REQUIREMENTS.md)。
+Passwords are stored with salted scrypt. The API does not return them. A login token lasts about 7 days.
 
-## 快速开始（Python 版）
+## AI
 
-需要 **Python 3.10 或更高版本**。基础预约、私聊等功能仅使用标准库，不需要 Node.js；新增神经双边匹配需额外安装 PyTorch 和 NumPy，见下文。前端继续使用浏览器原生 HTML、CSS 和 JavaScript。
+三块都在这个仓库里。润色和「帮我写」默认不需要密钥。匹配要另外安装 PyTorch。
 
-Windows 下双击 `start.bat`，或在项目目录运行：
+All three live in this repo. Polish and profile drafts need no API key by default. Matching needs PyTorch installed separately.
 
-```powershell
-.\start.ps1
-```
+### 文字润色 / Polish
 
-启动脚本会寻找系统 Python，也支持本机已有的应用内置 Python。可通过环境变量 `PYTHON_BIN` 指定解释器路径。
+把已经写好的文字改得更顺。先给你看结果，你再决定换不换。不配置模型时，用本地规则完成。个人简介最多 160 字，地陪介绍最多 600 字。
 
-已安装 Python 时，也可以直接运行：
+It tidies text you already wrote, shows you the result, and waits for you to accept it. With no model configured, local rules do the work. A profile bio is at most 160 characters. A guide intro is at most 600.
+
+### 帮我写简介和行程 / Profile and itinerary draft
+
+这个功能现在就能用。登录后请求 `POST /api/ai/profile-draft`。
+
+This is available now. While logged in, call `POST /api/ai/profile-draft`.
+
+写 6 到 300 个字，并选好城市。返回一段简介、正好 3 条亮点，以及三套行程：半日 4 小时、全天 8 小时、傍晚 3 小时。地点只来自你写的内容。地名不够时，用「沿途散步」「自由拍照」这类节点补上，不会编一个你没写过的店。
+
+Write 6–300 characters and choose a city. You get a bio, exactly 3 highlights, and three timelines: a 4-hour half day, an 8-hour full day, and a 3-hour evening. Places come only from your notes. If there are not enough place names, the draft uses generic stops such as “沿途散步” and “自由拍照”. It does not invent a venue you never wrote.
+
+不配置模型时，由 `server/ai_draft.py` 在本机生成。外部模型必须只返回 JSON。格式、字数、时间或地点不合格时，自动改用这个本地引擎。润色和草稿共用 `QINGHE_POLISH_*`。
+
+With no model configured, `server/ai_draft.py` generates the draft on this machine. An outside model must return JSON only. If the format, length, times, or places are not valid, the server switches to that local engine. Polish and drafts share `QINGHE_POLISH_*`.
+
+`variant` 取 0 到 20 的整数，用来换一版。超出范围返回 **400**。每个账号 60 秒内最多 8 次，再请求返回 **429**。可以用 `QINGHE_DRAFT_RATE_LIMIT` 和 `QINGHE_DRAFT_RATE_WINDOW` 调整。
+
+`variant` is an integer from 0 to 20 and asks for another version. A value outside that range returns **400**. Each account may call it 8 times in 60 seconds; the next call returns **429**. Change that with `QINGHE_DRAFT_RATE_LIMIT` and `QINGHE_DRAFT_RATE_WINDOW`.
+
+发布服务时可以带上 `highlights` 和 `itineraries`。不带的话，亮点用默认句子，套餐没有行程。
+
+When publishing a service you can send `highlights` and `itineraries`. If you leave them out, highlights use the default lines and the packages have no itinerary.
+
+### 双边匹配 / Two-sided matching
+
+旅人填一条行程，地陪填希望接待什么样的人。系统先看城市、语言、预算、人数和档期，再用一个很小的教学模型给双方各打一个分。分数只用来排序，不是“对方会答应”的概率。训练用的是人造数据。
+
+A traveller describes one trip. A guide describes who they like to host. The site checks city, language, budget, group size, and schedule first, then a small teaching model scores the pair from both sides. The score is only for sorting. It is not the chance that someone will say yes. Training used synthetic data.
+
+没装 PyTorch 时，预约和聊天仍然可用，推荐列表不可用。以前发布的服务要先补上偏好，系统不会替他们编。
+
+Without PyTorch, booking and chat still work. The recommendation list does not. Older services must add preferences first. The site will not invent them.
 
 ```bash
-python main.py --serve
+python -m venv .venv
+# Windows
+.\.venv\Scripts\python.exe -m pip install -r requirements-matching.txt
+.\.venv\Scripts\python.exe main.py --serve
 # macOS / Linux
-python3 main.py --serve
-# 或使用脚本
-bash start.sh
+.venv/bin/python -m pip install -r requirements-matching.txt
+.venv/bin/python main.py --serve
 ```
 
-打开 [http://127.0.0.1:4173](http://127.0.0.1:4173)。保持终端窗口打开，按 **Ctrl+C** 关闭。macOS / Linux 也可运行 `bash stop.sh`。
+网站已经开着时，可以造一组对得上的测试账号。重复运行会更新原账号，不会再造一份。
 
-默认监听 `127.0.0.1:4173`，可用环境变量 `HOST`、`PORT` 修改。端口已被占用时会提示启动失败；不要同时运行多个服务实例访问同一份数据。
-
-### 演示账号
-
-- 邮箱：`demo@qinghe.cn`
-- 密码：`qinghe123`
-
-演示账号预置了：
-- 1 条已确认的上海地陪预约
-- 1 条已完成的杭州地陪预约
-- 1 条已暂停接单的个人服务（可在「我的服务」里恢复）
-- 1 份带有城市封面、个人简介和 3 张照片的个人资料（可在「个人资料」查看和修改）
-- 2 段已开始的私聊对话，可在「消息」中继续
-
-也可以直接点击登录弹窗里的 **一键体验**。
-
-### 双边匹配测试账号
-
-预置地陪没有填写双边偏好，单靠演示账号无法看到推荐。服务启动后运行：
+With the site already running, you can create a matched set of test accounts. Running it again updates those accounts. It does not create a second set.
 
 ```bash
+# macOS / Linux
 .venv/bin/python tools/seed_matching_demo.py
+# Windows
+.\.venv\Scripts\python.exe tools/seed_matching_demo.py
 ```
 
-脚本通过网站接口创建 4 个上海地陪账号（`guide1`–`guide4@qinghe.test`，各自发布服务并填写偏好）和 4 个旅人账号（`traveler1`–`traveler4@qinghe.test`，各自发布行程），兴趣两两对应，并打印双方推荐结果。测试密码见脚本中的 `TEST_PASSWORD`。可重复运行，不会重复创建。
+账号是 `guide1`–`guide4@qinghe.test` 和 `traveler1`–`traveler4@qinghe.test`，密码是 `qinghe-test-2026`。页面在 `/matching`。算法说明见 [docs/MATCHING.md](docs/MATCHING.md)，图在 `训练图表/`。
 
-### 重置演示数据
+The accounts are `guide1`–`guide4@qinghe.test` and `traveler1`–`traveler4@qinghe.test`. The password is `qinghe-test-2026`. The page is `/matching`. The write-up is [docs/MATCHING.md](docs/MATCHING.md). Charts are in `训练图表/`.
 
-先关闭服务，再运行（会清空现有用户、预约、私聊和上传图片）：
-
-```powershell
-.\start.ps1 --reset
-# 或
-python main.py --reset
-```
-
-重置完成后重新启动。若进程意外退出留下 `server/server.pid`，请确认服务已经关闭，再删除该文件后重置。
-
-### 验证
+## 测试 / Tests
 
 ```bash
 python -m unittest discover -s tests -v
 ```
 
-只运行 14 个用户功能故事（筛选与预约、雨天改订、地陪休假、多旅人私聊、照片墙和润色预览等）：
+没装 PyTorch 时，神经匹配的测试会跳过，其余测试照常运行。
+
+Without PyTorch, the neural-matching tests are skipped. The other tests still run.
+
+用户从头走到尾的故事在 `tests/test_user_journeys.py`，说明见 [docs/TESTING.md](docs/TESTING.md)。
+
+Stories that follow a user from start to finish are in `tests/test_user_journeys.py`. See [docs/TESTING.md](docs/TESTING.md).
 
 ```bash
 python -m unittest discover -s tests -p test_user_journeys.py -v
 ```
 
-场景说明见 [测试文档](docs/TESTING.md)。这些场景通过真实接口验证用户功能，使用临时账号和数据。
+GitHub Actions 在 Ubuntu 和 Windows 上用 Python 3.10 和 3.12 跑测试。匹配测试另外用 Python 3.12，并安装 PyTorch。
 
-测试使用独立临时数据，覆盖登录、旧密码兼容、预约计价、发布服务、双向私聊、上传、并发写入、启动与重置，不修改现有业务数据。
+GitHub Actions runs the tests on Ubuntu and Windows with Python 3.10 and 3.12. Matching tests run separately on Python 3.12 with PyTorch installed.
 
----
+## 课程提交 / Course hand-in
 
-## Transformer + 异构图双边匹配
+课程要求的入口是 `main.py`。打包时把下面的 `3` 换成组号：
 
-网页导航的 **双边匹配** 提供旅人和地陪两个视角：旅人填写行程，地陪填写接单偏好，系统先检查预算与档期，再用轻量 Transformer 和异构图神经网络计算双向推荐分。旧服务须先补充偏好，不会自动编造地陪的接受意愿。
-
-```powershell
-python -m venv .venv
-.\.venv\Scripts\python.exe -m pip install -r requirements-matching.txt
-.\.venv\Scripts\python.exe tools/train_matching.py --preset wide_compact --epochs 180
-.\.venv\Scripts\python.exe main.py --serve
-```
-
-项目已提供通过合成确认集验收的三模型集成权重；普通训练输出候选到 output/matching_training，不覆盖当前权重。完整复验与晋级使用 tools/refine_matching.py。Windows 启动脚本优先使用 `.venv`。macOS / Linux 将解释器路径替换为 `.venv/bin/python`。无模型依赖时，原有基础功能仍可运行。
-
-当前为三个独立种子的小模型集成，每个含 1 层 Transformer、1 层异构图传播、四个显式相容性输入和两个评分头，总计约 5.5 万参数。当前只在合成偏好数据上训练，分数不是接受概率，也没有真实推荐效果验证。详情、训练数据和评估边界见 [匹配算法说明](docs/MATCHING.md)。
-
-## AI 润色模型接入
-
-AI 润色默认使用内置的本地规则引擎（`local`），**不配置任何东西网站也能正常润色**。需要更好的效果时，可以通过环境变量接入外部大模型，不用改代码。
-
-| 环境变量 | 说明 | 默认值 |
-| --- | --- | --- |
-| `QINGHE_POLISH_PROVIDER` | 提供方：`local` / `openai`（任何 OpenAI 兼容接口）/ `anthropic`（Claude 原生接口） | `local` |
-| `QINGHE_POLISH_MODEL` | 模型名，外部提供方必填 | — |
-| `QINGHE_POLISH_BASE_URL` | 接口根地址（不含 `/chat/completions`） | `openai`：`https://api.openai.com/v1`；`anthropic`：`https://api.anthropic.com/v1` |
-| `QINGHE_POLISH_API_KEY` | API 密钥，**只能**放在环境变量里 | — |
-| `QINGHE_POLISH_API_KEY_ENV` | 想沿用已有变量时，填它的名字，例如 `ANTHROPIC_API_KEY` | `QINGHE_POLISH_API_KEY` |
-| `QINGHE_POLISH_TIMEOUT` | 单次网络读写超时（秒） | `20` |
-| `QINGHE_POLISH_FALLBACK` | 外部模型失败时：`local` 自动改用本地引擎；`off` 直接返回错误 | `local` |
-| `QINGHE_POLISH_OPTIONS` | 合并进请求体的 JSON，例如 `{"temperature": 0.7}` | `{}` |
-| `QINGHE_POLISH_CONFIG` | 配置文件路径 | `server/ai_polish.local.json` |
-
-常见示例（设置后用 `./start.sh` 启动即可）：
-
-```bash
-# 本地 Ollama（OpenAI 兼容接口，无需密钥）
-export QINGHE_POLISH_PROVIDER=openai QINGHE_POLISH_BASE_URL=http://localhost:11434/v1 QINGHE_POLISH_MODEL=qwen2.5:7b
-```
-
-```bash
-# Claude（原生 Messages API）
-export QINGHE_POLISH_PROVIDER=anthropic QINGHE_POLISH_MODEL=claude-haiku-5-5 QINGHE_POLISH_API_KEY_ENV=ANTHROPIC_API_KEY
-```
-
-```bash
-# OpenAI 或其他兼容服务（DeepSeek、vLLM 等只需换 BASE_URL 和模型名）
-export QINGHE_POLISH_PROVIDER=openai QINGHE_POLISH_MODEL=你的模型名 QINGHE_POLISH_API_KEY=你的密钥
-```
-
-不想每次 `export` 时，可以把**非密钥**设置写进 `server/ai_polish.local.json`（已被 `.gitignore` 和打包脚本排除），环境变量优先级更高。文件里出现 `api_key`、`token` 等密钥字段会被拒绝：
-
-```json
-{"provider": "openai", "base_url": "http://localhost:11434/v1", "model": "qwen2.5:7b", "timeout": 30}
-```
-
-接口行为：
-
-- 请求格式不变；响应仍有 `text` 和 `engine`，并新增 `provider`、`model`。外部模型失败并回退本地引擎时，响应带 `fallbackFrom`（原提供方名），服务端日志记录原因（不记录密钥和用户原文）。
-- `QINGHE_POLISH_FALLBACK=off` 时，配置错误返回 503，超时返回 504，其他失败返回 502。
-- 模型输出会去掉代码块、引号、`<think>` 等包装，并按场景字数上限（简介 160 / 地陪介绍 600）裁剪。
-- 调用模型期间不占用全局数据锁，慢模型不会卡住网站其他请求。
-- 同一套提供方也用于「AI 帮我写」：`POST /api/ai/profile-draft`。模型必须只返回 JSON；格式、字数、行程时间或地点对不上时自动改用本地引擎。不配置模型时本地引擎即可离线生成。
-
-新增提供方只需在 `server/polish_providers.py` 里写一个类并注册：
-
-```python
-@register('my-model')
-class MyProvider(PolishProvider):
-    default_base_url = 'https://example.com/v1'
-    needs_key = True
-
-    def polish(self, request):          # request.text / scene / city / variant / limit
-        result = self.post_json('/generate', {'model': self.model, 'prompt': system_prompt(request) + request.text},
-                                {'Authorization': 'Bearer ' + self.settings.api_key})
-        return result['output']         # 返回原始文本；清理、裁剪、超时和错误处理由统一入口负责
-```
-
----
-
-## 功能清单
-
-### 登录 / 注册
-- 邮箱注册、登录、退出登录
-- 密码使用 Python `hashlib.scrypt` 加盐哈希存储，不保存明文密码
-- 基于 Bearer Token 的本地会话，有效期 7 天
-- 登录状态持久化在浏览器 `localStorage`
-- 未登录时预约会自动唤起登录弹窗，登录后继续完成预约
-- 一键体验账号
-- 登录、注册表单的前后端双重校验
-
-### 地陪（核心板块）
-- 全国 34 个省级行政区、151 座城市可选
-- 首页地陪搜索：城市、出发日期、服务类型；城市按省份分组
-- 地陪列表：全国热门城市快捷筛选 + 可搜索的「更多城市」弹层，支持服务、语言、价格、关键词筛选与多种排序
-- 6 位预置地陪 + 1 位演示账号发布的服务
-- 地陪详情：照片画廊、个人介绍、服务亮点、适合人群、套餐选择、真实评价、服务保障
-- 预约流程：套餐、日期、时间、人数、留言、价格明细
-- 超过 4 人自动计算额外服务费
-- 预约成功弹窗与订单记录
-- 我的预约：查看、取消、再次预约
-- 成为地陪：完整发布表单、实时预览、封面支持「预置图片 + 本地照片导入」、头像色调、服务标签、语言设置
-- 我的服务：查看发布状态、暂停 / 恢复接单
-- 收藏地陪（浏览器本地存储）
-- 从地陪卡片、地陪详情或消息页发起私聊
-
-### 私聊
-- 地陪卡片简介处和详情页均提供「私聊」按钮
-- 独立 `/messages` 消息中心，左侧会话列表、右侧聊天窗口
-- 双方视角：旅人可以联系地陪，发布服务的地陪也可以回复旅人
-- 消息发送、未读计数、4 秒轮询接收新消息
-- 预置地陪与新对话会收到一条欢迎语，便于演示完整流程
-- 移动端采用会话列表 / 聊天窗口切换布局
-
-### 个人资料与本地照片
-- 独立 `/profile` 个人资料页
-- 从本地相册上传头像，自动居中裁切为方形
-- 从本地上传个人主页封面
-- 最多 6 张个人照片墙，支持上传、预览、删除
-- 图片在浏览器端自动压缩，最长边 1600px，单张原始文件不超过 15MB
-- 头像会同步显示在导航栏，以及该用户发布的地陪服务中
-- 昵称、常驻城市、个人简介编辑，简介会显示在个人中心
-- 个人简介和地陪「关于你」都支持 AI 自动润色
-- 润色结果先预览，可替换原文或再润色一次
-- 个人资料头像支持本地图片上传、更换和移除
-- 「成为地陪」的头像底色区域同样支持上传本地头像，并同步到账号
-- 资料完成度、个人主页预览
-
-### 其他板块
-- 摄影、模特、博物馆讲解员、NPC 作为「即将开放」入口展示
-- 点击会弹出板块预告，不提供空的假页面
-
-### 体验与视觉
-- 淡绿色 + 白色视觉体系，衬线标题与无衬线正文搭配
-- 响应式布局：桌面、平板、手机
-- 消息中心支持桌面双栏与移动端单栏切换
-- 移动端底部预约快捷栏
-- 图片灯箱、Toast、确认弹窗、成功弹窗、空状态、骨架屏
-- `prefers-reduced-motion` 降级
-- 基础无障碍：跳转链接、焦点样式、弹窗焦点循环、Esc 关闭
-
----
-
-## 技术说明
-
-- **前端**：原生 HTML + CSS + ES Modules，无打包步骤，无运行时依赖
-- **后端**：Python 标准库 `http.server`；基础功能零第三方依赖；神经匹配使用 PyTorch / NumPy
-- **数据**：`server/data.json` 文件持久化（不是数据库）
-- **AI 润色**：默认使用本地轻量文本引擎，不依赖外部 API Key，保留原意并优化标点、节奏与表达；可通过环境变量接入 OpenAI 兼容接口、Ollama、Claude 等模型，见 [AI 润色模型接入](#ai-润色模型接入)
-- **AI 帮我写**（后端）：本地人写 6–300 字，生成简介、正好 3 条亮点和三个套餐的行程。行程地点只来自原文，不够时用「沿途散步」这类节点补位。`part` 可单独重写 `bio` / `highlights` / `itinerary`
-- **上传**：本地图片压缩后写入 `public/uploads/`，用户资料中保存文件地址
-- **图片安全**：仅接受 JPG / PNG / WebP，校验文件头、限制 5MB，不使用可执行 SVG
-- **封面导入**：成为地陪时可直接从本地相册导入封面，客户端自动压缩后上传，服务端校验文件存在后写入服务
-- **认证**：scrypt 密码哈希 + 随机 Token 会话
-- **静态资源**：Python 静态文件服务 + SPA 回退
-
-项目使用 Python 后端与原生网页前端，方便直接运行、阅读和二次开发。所有页面、接口和状态都在本仓库内。原有 server/data.json 与上传文件可直接沿用，原 Node.js scrypt 密码也兼容。
-
-### 目录结构
-
-```text
-qinghe/
-├── pyproject.toml           # Python 项目信息
-├── main.py                  # 课程要求的主入口与 CLI
-├── start.py                 # 兼容旧启动方式
-├── start.ps1                # Windows 自动寻找 Python
-├── start.bat                # Windows 双击启动
-├── start.sh                 # macOS / Linux 启动
-├── README.md
-├── CREDITS.md               # 图片版权说明
-├── public/
-│   ├── index.html
-│   ├── favicon.svg
-│   ├── css/styles.css
-│   ├── js/
-│   │   ├── app.js           # 启动、路由分发、全局交互
-│   │   ├── api.js           # fetch 封装
-│   │   ├── session.js       # 登录态
-│   │   ├── image.js         # 本地图片压缩
-│   │   ├── router.js        # History 路由
-│   │   ├── state.js
-│   │   ├── ui.js            # 图标、弹窗、Toast、格式化
-│   │   ├── components/
-│   │   │   ├── ai-polish.js   # AI 润色弹窗
-│   │   │   ├── auth-modal.js
-│   │   │   ├── guide-card.js
-│   │   │   └── header.js
-│   │   └── pages/
-│   │       ├── home.js
-│   │       ├── guides.js
-│   │       ├── detail.js
-│   │       ├── become.js
-│   │       ├── account.js
-│   │       ├── profile.js
-│   │       └── messages.js
-│   ├── uploads/            # 本地头像 / 封面 / 照片
-│   └── assets/images/
-├── tests/test_server.py      # 接口集成测试
-└── server/
-    ├── server.py             # HTTP 服务与 API
-    ├── store.py              # JSON 文件存储与演示数据初始化
-    ├── seed-data.json        # 初始演示素材（不包含用户现有数据）
-    ├── catalog.json          # 城市、服务、语言等枚举
-    ├── pricing.py            # CLI 与预约共用计价规则
-    ├── matching_model.py     # Transformer + 异构图网络与双向评分头
-    ├── matching_service.py   # 匹配条件、档期与推荐排序
-    ├── matching_api.py       # 双方偏好、行程、推荐与联系接口
-    ├── matching_data.py      # 明确标注的合成训练样例
-    ├── models/              # 教学模型权重与训练报告
-    ├── auth_utils.py         # scrypt / token
-    ├── ai_polish.py          # 本地文本润色引擎
-    ├── ai_draft.py           # 本地简介、亮点与行程草稿
-    ├── polish_providers.py   # 润色与草稿的提供方接口、配置与外部模型接入
-    └── data.json             # 业务数据，首次启动自动生成
-```
-
-### 主要 API
-
-| 方法 | 路径 | 说明 |
-| --- | --- | --- |
-| POST | `/api/auth/register` | 注册并自动登录 |
-| POST | `/api/auth/login` | 登录 |
-| POST | `/api/auth/logout` | 退出登录 |
-| GET | `/api/auth/me` | 当前登录用户 |
-| PATCH | `/api/profile` | 更新昵称、城市、简介（需登录） |
-| GET | `/api/conversations` | 我的会话列表（需登录） |
-| POST | `/api/conversations` | 发起或获取与某位地陪的会话（需登录） |
-| GET | `/api/conversations/:id/messages` | 会话消息，并标记已读（需登录） |
-| POST | `/api/conversations/:id/messages` | 发送私聊消息（需登录） |
-| GET | `/api/messages/unread` | 当前用户未读总数（需登录） |
-| POST | `/api/ai/polish` | 对个人简介 / 地陪介绍进行 AI 润色，响应注明实际使用的 `provider` / `model`（需登录） |
-| POST | `/api/ai/profile-draft` | 根据 `notes`（6–300 字）、`city`、可选 `services` / `packages` / `part` / `variant` 生成 `bio`、3 条 `highlights` 和套餐 `itineraries`。`part` 为 `all`（默认）、`bio`、`highlights` 或 `itinerary`。响应带 `provider`、`model`、`fallbackFrom`（需登录） |
-| POST | `/api/profile/photo` | 上传头像 / 封面 / 照片（需登录） |
-| DELETE | `/api/profile/photo` | 移除头像 / 封面 / 照片（需登录） |
-| GET | `/api/meta` | 城市、服务、语言、封面、演示账号等元信息 |
-| GET | `/api/guides` | 地陪列表，支持筛选与排序 |
-| GET | `/api/guides/:id` | 地陪详情 |
-| POST | `/api/uploads` | 上传地陪封面等临时图片（需登录） |
-| POST | `/api/guides` | 发布地陪服务（需登录）。可选 `highlights`（3 条，每条 ≤ 20 字）和 `itineraries`（`half` / `full` / `evening` 的时间线）；不传时亮点用默认文案，套餐不带 `itinerary` |
-| PATCH | `/api/guides/:id` | 暂停 / 恢复接单（仅发布者） |
-| GET | `/api/guides/mine` | 我发布的服务（需登录） |
-| POST | `/api/bookings` | 创建预约（需登录） |
-| GET | `/api/bookings/mine` | 我的预约（需登录） |
-| PATCH | `/api/bookings/:id/cancel` | 取消预约（需登录） |
-
-筛选参数示例：
-
-```text
-/api/guides?city=上海&service=城市漫步&language=英语&minPrice=200&maxPrice=400&sort=rating&q=咖啡
-```
-
----
-
-## 数据与安全说明
-
-- 这是一个完整的可交互演示项目，**不是生产级交易系统**。
-- 没有接入数据库；用户、登录会话、地陪服务、预约、私聊会话与消息保存在 `server/data.json`，上传的图片保存在 `public/uploads/`。重启服务后数据仍在。
-- 密码使用 `scrypt` 加盐哈希，接口不会返回密码哈希或盐。
-- AI 润色的 API 密钥只从环境变量读取，不写入代码、配置文件或仓库。
-- 演示版未接入短信验证、邮件验证、支付、地图、实名认证和对象存储。
-- 私聊当前使用 HTTP 轮询模拟实时消息，正式版建议替换为 WebSocket 或消息队列。
-- 正式上线前至少需要：数据库、对象存储、HTTPS、严格的频控与风控、实名认证、支付与退款、隐私合规、内容审核。
-- 平台定位为正规的城市旅行陪伴与个人服务，社区公约明确要求公开场所见面、平台内沟通、拒绝私下交易和任何越界邀约。
-
----
-
-## 图片版权
-
-本项目使用了 Unsplash 与 Wikimedia Commons 的摄影作品作为演示素材。详细作者、来源和许可信息见 [CREDITS.md](./CREDITS.md)。
-
-如果用于正式产品，请替换为自有版权图片，并保留相应的署名与许可要求。
-
-## 课程提交打包
-
-将下面的 3 替换为实际组号：
+The required entry point is `main.py`. When you pack the project, replace `3` with your group number:
 
 ```bash
 python tools/package_project.py --group 3
 ```
 
-生成 `output/group3_project.zip`，包括源码、初始演示数据、测试和说明。不会打包现有账号、聊天、预约或上传图片；解压后会生成全新的演示数据。提交前在独立目录解压并运行 `python main.py` 和测试。展示、视频、个人报告须按课程清单另行完成。
+得到 `output/group3_project.zip`。包里没有你现在的账号、聊天、预约和上传图片。要求对照表在 [docs/COURSE_REQUIREMENTS.md](docs/COURSE_REQUIREMENTS.md)。
 
-双边匹配的旅人需求保存在 `server/data.json` 的 `matchTrips`，地陪偏好保存在服务的 `matchPreferences`。提交打包仍排除这些现有业务数据；模型权重仅来自合成样例，会随源码包提供。
+This writes `output/group3_project.zip`. The zip leaves out your current accounts, chats, bookings, and uploads. The checklist is [docs/COURSE_REQUIREMENTS.md](docs/COURSE_REQUIREMENTS.md).
 
-模型优化的对照实验、训练/验证曲线、候选误差与排序结果、失败尝试及计算开销见 [优化报告](docs/OPTIMIZATION.md)。测试套件现有 81 项；未安装 PyTorch 时，其中的神经匹配用例会跳过。
+## 接下来 / Next
+
+| 中文 | English |
+| --- | --- |
+| 发布页上的「AI 帮我写」按钮，以及详情页上的行程时间线。方案在 [docs/AI_ITINERARY.md](docs/AI_ITINERARY.md)。接口本身已经可用。 | A “AI 帮我写” button on the publish page, and a timeline on the guide page. The plan is [docs/AI_ITINERARY.md](docs/AI_ITINERARY.md). The API itself is already available. |
+| 摄影、模特、博物馆讲解员、NPC。 | Photography, modelling, museum guides, and NPC. |
+| 这是课堂演示，没有支付、数据库和实名认证。 | This is a class demo. There is no payment, database, or identity check. |
+
+## 致谢 / Thanks
+
+演示照片来自 Unsplash 和 Wikimedia Commons。作者和许可写在 [CREDITS.md](./CREDITS.md)。页面用系统字体，图标是项目里画的。
+
+Demo photos come from Unsplash and Wikimedia Commons. Authors and licences are in [CREDITS.md](./CREDITS.md). The pages use system fonts. The icons are drawn in the project.
+
+## 参考 / Reference
+
+<details>
+<summary>环境变量 / Environment variables</summary>
+
+| 变量 / Variable | 作用 / What it does | 默认 / Default |
+| --- | --- | --- |
+| `HOST` | 监听地址。 Listen address. | `127.0.0.1` |
+| `PORT` | 端口。 Port. | `4173` |
+| `PYTHON_BIN` | 指定 Python。 Which Python to run. | 自动找 3.10+。 Auto-detect 3.10+. |
+| `QINGHE_POLISH_PROVIDER` | `local`、`openai`（含兼容接口）或 `anthropic`。 `local`, `openai` (including compatible APIs), or `anthropic`. | `local` |
+| `QINGHE_POLISH_MODEL` | 外部模型名。外部提供方必填。 Outside model name. Required for an outside provider. | 空。 Empty. |
+| `QINGHE_POLISH_BASE_URL` | 接口根地址，不要带 `/chat/completions`。 API root, without `/chat/completions`. | OpenAI 或 Anthropic 的官方地址。 The official OpenAI or Anthropic root. |
+| `QINGHE_POLISH_API_KEY` | 密钥。只能放在环境变量里。 API key. Environment variable only. | 空。 Empty. |
+| `QINGHE_POLISH_API_KEY_ENV` | 改用另一个变量存放密钥，例如 `ANTHROPIC_API_KEY`。 Read the key from another variable, such as `ANTHROPIC_API_KEY`. | `QINGHE_POLISH_API_KEY` |
+| `QINGHE_POLISH_TIMEOUT` | 单次网络超时，单位秒。 Network timeout in seconds. | `20` |
+| `QINGHE_POLISH_FALLBACK` | `local`：失败后改用本地引擎。`off`：直接报错。 `local` falls back to the local engine. `off` returns an error. | `local` |
+| `QINGHE_POLISH_OPTIONS` | 合并进请求的 JSON，例如 `{"temperature": 0.7}`。 Extra JSON merged into the request, for example `{"temperature": 0.7}`. | `{}` |
+| `QINGHE_POLISH_CONFIG` | 非密钥配置文件。 Config file for non-secret settings. | `server/ai_polish.local.json` |
+| `QINGHE_DRAFT_RATE_LIMIT` | 每个账号在一个窗口里最多生成几次草稿。 Max drafts per account in one window. | `8` |
+| `QINGHE_DRAFT_RATE_WINDOW` | 上面这个窗口有多少秒。 Window length in seconds. | `60` |
+
+本机 Ollama 的例子。不需要密钥。
+
+Example for local Ollama. No key is required.
+
+```bash
+export QINGHE_POLISH_PROVIDER=openai
+export QINGHE_POLISH_BASE_URL=http://localhost:11434/v1
+export QINGHE_POLISH_MODEL=qwen2.5:7b
+```
+
+不想每次都 `export` 时，把**不含密钥**的设置写进 `server/ai_polish.local.json`。这个文件不会进 git。文件里如果出现密钥字段，会被拒绝。环境变量优先。
+
+To avoid exporting every time, put **non-secret** settings in `server/ai_polish.local.json`. That file is not committed. A secret field in the file is rejected. Environment variables win.
+
+```json
+{"provider": "openai", "base_url": "http://localhost:11434/v1", "model": "qwen2.5:7b", "timeout": 30}
+```
+
+`QINGHE_POLISH_FALLBACK=off` 时：配置错误返回 503，超时返回 504，其他失败返回 502。
+
+With `QINGHE_POLISH_FALLBACK=off`: a bad configuration returns 503, a timeout returns 504, and other failures return 502.
+
+</details>
+
+<details>
+<summary>帮我写：地名和时间 / Draft places and times</summary>
+
+本地引擎从「去、在、逛、到」后面找地名。名字要以这些字结尾：公园、市场、街道、大街、巷子、路、街、巷、寺、馆、山、湖。「不赶路」这类普通词不会被当成地点。
+
+The local engine looks for a place name after 去, 在, 逛, or 到. The name must end in 公园, 市场, 街道, 大街, 巷子, 路, 街, 巷, 寺, 馆, 山, or 湖. Ordinary words such as 不赶路 are not places.
+
+默认开始时间：半日 10:00，全天 09:00，傍晚 17:00。`variant` 是奇数时，半日改从 13:00 开始。每个行程 3 到 5 个节点，时间均匀排开，首尾不超过套餐时长，而且必须越来越晚。傍晚不能早于 17:00。
+
+Default start times: half day 10:00, full day 09:00, evening 17:00. When `variant` is odd, the half day starts at 13:00. Each itinerary has 3 to 5 stops, spaced evenly, inside the package length, and each time is later than the one before. An evening cannot start before 17:00.
+
+`part` 可以是 `all`（默认）、`bio`、`highlights` 或 `itinerary`，用来只重写一块。
+
+`part` may be `all` (the default), `bio`, `highlights`, or `itinerary`, when you want to rewrite only one block.
+
+</details>
+
+<details>
+<summary>接口 / API</summary>
+
+除了特别注明的，下面写「需登录」的接口都要带登录令牌。
+
+Unless noted, routes marked “login” need a login token.
+
+| 方法 | 路径 | 说明 / What it does |
+| --- | --- | --- |
+| POST | `/api/auth/register` | 注册并登录。 Register and log in. |
+| POST | `/api/auth/login` | 登录。 Log in. |
+| POST | `/api/auth/logout` | 退出。 Log out. |
+| GET | `/api/auth/me` | 当前用户。 Current user. |
+| PATCH | `/api/profile` | 改昵称、城市、简介。需登录。 Name, city, bio. Login. |
+| POST | `/api/profile/photo` | 上传头像、封面或照片。需登录。 Upload an avatar, cover, or photo. Login. |
+| DELETE | `/api/profile/photo` | 移除头像、封面或照片。需登录。 Remove one. Login. |
+| GET | `/api/conversations` | 我的会话。需登录。 My chats. Login. |
+| POST | `/api/conversations` | 打开和某位地陪的会话。需登录。 Open a chat with a guide. Login. |
+| GET | `/api/conversations/:id/messages` | 读取消息并标为已读。需登录。 Read messages and mark them read. Login. |
+| POST | `/api/conversations/:id/messages` | 发消息。需登录。 Send a message. Login. |
+| GET | `/api/messages/unread` | 未读总数。需登录。 Unread count. Login. |
+| POST | `/api/ai/polish` | 润色简介或地陪介绍。需登录。 Polish a bio or guide intro. Login. |
+| POST | `/api/ai/profile-draft` | 生成简介、3 条亮点和行程。需登录。太频繁返回 429，`variant` 超出 0–20 返回 400。 Draft a bio, 3 highlights, and itineraries. Login. Too many calls return 429. A `variant` outside 0–20 returns 400. |
+| GET | `/api/meta` | 城市、服务、语言等选项。 Cities, services, languages, and other choices. |
+| GET | `/api/health` | 服务是否在跑。 Whether the server is up. |
+| GET | `/api/guides` | 地陪列表，可筛选、排序。 Guide list, with filters and sorting. |
+| GET | `/api/guides/:id` | 地陪详情。 One guide. |
+| GET | `/api/guides/mine` | 我发布的服务。需登录。 Services I published. Login. |
+| POST | `/api/uploads` | 上传封面等临时图片。需登录。 Upload a cover or other temporary image. Login. |
+| POST | `/api/guides` | 发布服务。需登录。可选 3 条亮点（每条最多 20 字）和行程。 Publish a service. Login. Optional: 3 highlights (at most 20 characters each) and itineraries. |
+| PATCH | `/api/guides/:id` | 暂停或恢复。仅发布者。 Pause or resume. Publisher only. |
+| POST | `/api/bookings` | 创建预约。需登录。 Create a booking. Login. |
+| GET | `/api/bookings/mine` | 我的预约。需登录。 My bookings. Login. |
+| PATCH | `/api/bookings/:id/cancel` | 取消预约。需登录。 Cancel a booking. Login. |
+| GET | `/api/matching/meta` | 匹配用的兴趣、节奏，以及模型是否就绪。 Interests, pace, and whether the model is ready. |
+| GET / POST / DELETE | `/api/matching/trip` | 读取、保存或撤回我的行程。需登录。 Read, save, or withdraw my trip. Login. |
+| PATCH | `/api/matching/preferences/:id` | 填写自己某项服务的接单偏好。需登录。 Set preferences on one of my services. Login. |
+| GET | `/api/matching/guides` | 按我的行程推荐地陪。需登录，且已安装模型。 Suggest guides for my trip. Login, and the model must be installed. |
+| GET | `/api/matching/travelers` | 按我的服务推荐行程。需登录，且已安装模型。 Suggest trips for my service. Login, and the model must be installed. |
+| POST | `/api/matching/contact` | 地陪联系一条符合条件的行程。需登录。 A guide contacts a trip that passes the checks. Login. |
+
+筛选例子 / Filter example:
+
+```text
+/api/guides?city=上海&service=城市漫步&language=英语&minPrice=200&maxPrice=400&sort=rating&q=咖啡
+```
+
+`sort` 可以是 `recommended`、`price-asc`、`price-desc`、`rating`、`popular`、`newest`。
+
+`sort` may be `recommended`, `price-asc`, `price-desc`, `rating`, `popular`, or `newest`.
+
+</details>
+
+<details>
+<summary>目录 / Layout</summary>
+
+```text
+qinghe/
+├── main.py                 # 课程入口和命令行菜单 / course entry and menu
+├── start.py                # 不带参数时直接开网站 / serves the site when run with no arguments
+├── start.sh                # macOS / Linux
+├── start.ps1  start.bat    # Windows
+├── stop.sh
+├── pyproject.toml
+├── requirements-matching.txt
+├── public/                 # 页面、样式、脚本、演示图片 / pages, styles, scripts, demo images
+├── preview/                # 说明文档用的界面截图 / screenshots used in this README
+├── 训练图表/                # 匹配模型的训练图 / matching-model charts
+├── tests/
+├── tools/                  # 训练、演示账号、课程打包 / training, demo accounts, course zip
+├── docs/
+└── server/
+    ├── server.py           # HTTP 接口 / HTTP API
+    ├── store.py            # JSON 存储 / JSON storage
+    ├── pricing.py          # 报价 / price quote
+    ├── ai_polish.py        # 本地润色 / local polish
+    ├── ai_draft.py         # 本地简介和行程 / local bio and itinerary
+    ├── polish_providers.py # 外部模型，润色和草稿共用 / outside models for polish and drafts
+    ├── matching_*.py       # 双边匹配 / two-sided matching
+    ├── catalog.json        # 城市和服务选项 / cities and service choices
+    ├── seed-data.json      # 初始演示数据 / initial demo data
+    └── models/             # 已训练好的教学模型 / trained teaching model
+```
+
+业务数据在首次启动时写成 `server/data.json`，不会提交到 git。
+
+Business data is written to `server/data.json` on first launch. It is not committed.
+
+</details>
+
+<details>
+<summary>更多截图 / More screenshots</summary>
+
+![地陪详情 / Guide page](./preview/guide-detail.jpg)
+
+![AI 润色 / AI polish](./preview/ai-polish.jpg)
+
+![私聊 / Messages](./preview/messages.jpg)
+
+![个人资料 / Profile](./preview/profile.jpg)
+
+</details>
+
+<details>
+<summary>数据与安全 / Data and safety</summary>
+
+这是可以点、可以预约的课堂演示，不是能收款的正式产品。
+
+This is a class demo you can click through and book in. It is not a product that can take payment.
+
+用户、会话、服务、预约和私聊都在 `server/data.json`。图片在 `public/uploads/`。重启后还在。
+
+Users, sessions, services, bookings, and chats live in `server/data.json`. Images live in `public/uploads/`. They remain after a restart.
+
+上传只接受 JPG、PNG、WebP。服务端核对文件头，并限制 5MB。浏览器会先把长边压到 1600 像素，原始文件不能超过 15MB。
+
+Uploads accept JPG, PNG, and WebP only. The server checks the file header and limits a file to 5MB. The browser first shrinks the long side to 1600 pixels. The original file cannot exceed 15MB.
+
+模型密钥只从环境变量读取，不写进代码或仓库。私聊靠大约每 4 秒问一次服务器，不是长连接。
+
+Model keys are read only from environment variables. They are not written into the code or the repo. Chat asks the server about every 4 seconds. It is not a live socket.
+
+见面请留在公开场所，沟通请留在平台里。
+
+Meet in public places, and keep the conversation on the platform.
+
+</details>
