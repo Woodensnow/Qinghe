@@ -8,14 +8,17 @@ import random
 import re
 import signal
 import sys
+import threading
+import time
 from datetime import date, datetime, timedelta, timezone
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import parse_qs, unquote, urlsplit
 
 from auth_utils import hash_password, verify_password, make_id, make_token
+from ai_draft import PACKAGE_KEYS, PACKAGES as DRAFT_PACKAGES
 from ai_polish import LIMITS
-from polish_providers import PolishError, polish
+from polish_providers import DraftSchemaError, PolishError, draft, polish, validate_highlights, validate_itineraries
 from pricing import quote
 from store import data, save, LOCK, ROOT, now_iso
 
@@ -145,17 +148,94 @@ def rounded_package_price(amount):
     return math.floor(amount / 10 + .5) * 10
 
 
-def make_packages(city, price):
+# A demo burst, shared by the local engine and any configured model.
+DRAFT_RATE_LIMIT = 8
+DRAFT_RATE_WINDOW = 60
+_DRAFT_HITS = {}
+_DRAFT_HITS_LOCK = threading.Lock()
+
+
+def draft_rate_settings():
+    """QINGHE_DRAFT_RATE_LIMIT requests per QINGHE_DRAFT_RATE_WINDOW seconds. Bad values keep the defaults."""
+    def read(name, default, highest):
+        raw = os.environ.get(name, '').strip()
+        if not raw:
+            return default
+        try:
+            value = int(raw)
+        except ValueError:
+            return default
+        return value if 1 <= value <= highest else default
+    return read('QINGHE_DRAFT_RATE_LIMIT', DRAFT_RATE_LIMIT, 100), read('QINGHE_DRAFT_RATE_WINDOW', DRAFT_RATE_WINDOW, 3600)
+
+
+def reset_draft_rate_limit():
+    with _DRAFT_HITS_LOCK:
+        _DRAFT_HITS.clear()
+
+
+def draft_rate_key(user, address):
+    if user and user.get('id'):
+        return 'user:' + str(user['id'])
+    host = address[0] if isinstance(address, tuple) and address else 'unknown'
+    return 'ip:' + str(host)
+
+
+def allow_draft(key, now=None):
+    """Record one draft attempt. False means this user (or IP) is over the burst."""
+    limit, window = draft_rate_settings()
+    now = time.monotonic() if now is None else now
+    with _DRAFT_HITS_LOCK:
+        expired = [bucket for bucket, stamps in _DRAFT_HITS.items() if not stamps or now - stamps[-1] >= window]
+        for bucket in expired:
+            del _DRAFT_HITS[bucket]
+        hits = [stamp for stamp in _DRAFT_HITS.get(key, ()) if now - stamp < window]
+        if len(hits) >= limit:
+            _DRAFT_HITS[key] = hits
+            return False
+        hits.append(now)
+        _DRAFT_HITS[key] = hits
+        return True
+
+
+def parse_draft_variant(body):
+    """0 when omitted. None when the value is not an integer from 0 to 20."""
+    if 'variant' not in body or body.get('variant') is None:
+        return 0
+    value = body.get('variant')
+    if isinstance(value, bool) or not isinstance(value, (int, float)):
+        return None
+    if isinstance(value, float):
+        if not math.isfinite(value) or not value.is_integer():
+            return None
+        value = int(value)
+    if not 0 <= value <= 20:
+        return None
+    return value
+
+
+def make_packages(city, price, itineraries=None):
     # Shorter packages must not cost more than longer ones. The evening floor of
     # ¥60 would otherwise exceed a half-day base of ¥50–¥59.
     half = price
     full = max(half, 80, rounded_package_price(price * 1.7))
     evening = min(half, max(60, rounded_package_price(price * .75)))
-    return [dict(id=make_id('pkg'), name=name, duration=duration, price=cost, description=description, includes=includes)
-            for name, duration, cost, description, includes in [
-                ('半日轻游', '4 小时', half, f'用半天时间，走一条不赶路的{city}本地路线。', ['一对一路线定制', '沿途讲解', '本地生活建议']),
-                ('全天深度游', '8 小时', full, f'从早到晚慢慢逛，把{city}的日常与风景一次收进旅程。', ['全天行程定制', '路线陪同', '餐饮与交通建议']),
-                ('傍晚轻陪游', '3 小时', evening, '下班后的城市散步，适合差旅途中偷得半日闲。', ['夜间路线', '拍照协助', '本地宵夜推荐'])]]
+    costs = dict(half=half, full=full, evening=evening)
+    details = {
+        'half': (f'用半天时间，走一条不赶路的{city}本地路线。', ['一对一路线定制', '沿途讲解', '本地生活建议']),
+        'full': (f'从早到晚慢慢逛，把{city}的日常与风景一次收进旅程。', ['全天行程定制', '路线陪同', '餐饮与交通建议']),
+        'evening': ('下班后的城市散步，适合差旅途中偷得半日闲。', ['夜间路线', '拍照协助', '本地宵夜推荐']),
+    }
+    packages = []
+    for spec in DRAFT_PACKAGES:
+        description, includes = details[spec['key']]
+        package = dict(id=make_id('pkg'), key=spec['key'], name=spec['name'], duration=spec['duration'],
+                       price=costs[spec['key']], description=description, includes=includes)
+        nodes = (itineraries or {}).get(spec['key'])
+        if nodes:
+            package['itinerary'] = [dict(time=node['time'], place=node['place'], activity=node['activity']) for node in nodes]
+        packages.append(package)
+    return packages
 
 
 class Handler(BaseHTTPRequestHandler):
@@ -231,12 +311,54 @@ class Handler(BaseHTTPRequestHandler):
             raise ApiError(error.status, error.message)
         return 200, result.to_json()
 
+    def draft_route(self):
+        check(self.command == 'POST', '请求方式不支持', status=405)
+        with LOCK:
+            user = self.current_user()
+        body = self.read_body()
+        notes = body.get('notes')
+        check(isinstance(notes, str), '请写 6 到 300 字，方便生成简介和行程', 'notes')
+        notes = notes.strip()
+        check(6 <= len(notes) <= 300, '请写 6 到 300 字，方便生成简介和行程', 'notes')
+        city = text(body.get('city'), 20)
+        check(city in CATALOG['CITIES'], '请选择服务城市', 'city')
+        services = body.get('services', [])
+        check(isinstance(services, list), '服务类型不正确', 'services')
+        chosen = []
+        for item in services:
+            check(isinstance(item, str) and item in CATALOG['SERVICE_TYPES'], '服务类型不正确', 'services')
+            if item not in chosen:
+                chosen.append(item)
+        raw_packages = body.get('packages')
+        if raw_packages is None:
+            package_keys = list(PACKAGE_KEYS)
+        else:
+            check(isinstance(raw_packages, list) and raw_packages, '套餐不正确', 'packages')
+            package_keys = []
+            for item in raw_packages:
+                key = item.get('key') if isinstance(item, dict) else None
+                check(key in PACKAGE_KEYS and key not in package_keys, '套餐不正确', 'packages')
+                package_keys.append(key)
+        part = text(body.get('part', 'all'), 20)
+        check(part in {'all', 'bio', 'highlights', 'itinerary'}, '生成范围不正确', 'part')
+        variant = parse_draft_variant(body)
+        check(variant is not None, '版本号需要是 0 到 20 的整数', 'variant')
+        check(allow_draft(draft_rate_key(user, self.client_address)), '生成太频繁，请稍后再试', status=429)
+        try:
+            result = draft(notes, city, chosen, package_keys, part, variant)
+        except PolishError as error:
+            messages = {502: 'AI 生成服务暂时不可用，请稍后再试', 503: 'AI 生成服务未正确配置', 504: 'AI 生成服务响应超时，请稍后再试'}
+            raise ApiError(error.status, messages.get(error.status, error.message))
+        return 200, result.to_json()
+
     def dispatch(self):
         try:
             url = urlsplit(self.path)
             if url.path == '/api/ai/polish':
                 # Model calls can be slow, so only the login check holds the store lock.
                 self.respond(*self.polish_route())
+            elif url.path == '/api/ai/profile-draft':
+                self.respond(*self.draft_route())
             elif url.path.startswith('/api/'):
                 # A complete read/modify/save cycle is serialized, matching the old
                 # single-process store and preventing lost updates between requests.
@@ -451,8 +573,21 @@ class Handler(BaseHTTPRequestHandler):
             check(languages, '请至少选择一种沟通语言', 'languages')
             check(usable_cover(cover), '请选择或导入一张有效的封面图', 'cover')
             check(tone in CATALOG['AVATAR_TONES'], '头像样式不正确', 'avatarTone')
+            if 'highlights' in body and body.get('highlights') is not None:
+                try:
+                    highlights = validate_highlights(body.get('highlights'))
+                except DraftSchemaError as error:
+                    raise ApiError(400, str(error), 'highlights')
+            else:
+                highlights = [city + '本地人私藏路线', '不赶路的轻松节奏', '出发前一对一沟通']
+            itineraries = None
+            if 'itineraries' in body and body.get('itineraries') is not None:
+                try:
+                    itineraries = validate_itineraries(body.get('itineraries'))
+                except DraftSchemaError as error:
+                    raise ApiError(400, str(error), 'itineraries')
             price = math.floor(price + .5)
-            guide = dict(id=make_id('g'), ownerId=user['id'], name=name, city=city, headline=headline, bio=bio, cover=cover, gallery=[cover, '/assets/images/gallery-cafe.jpg', '/assets/images/gallery-tea.jpg'], avatarTone=tone, avatarUrl=user.get('avatarUrl', ''), verified=False, featured=False, rating=5, reviewCount=0, orders=0, responseTime='新入驻 · 24 小时内回复', responseRate='新入驻', languages=languages, services=services, tags=[city + '本地人'] + services[:2], highlights=[city + '本地人私藏路线', '不赶路的轻松节奏', '出发前一对一沟通'], idealFor=['第一次来' + city, '朋友 / 情侣出行', '想轻松玩的人'], price=price, packages=make_packages(city, price), reviews=[], createdAt=now_iso(), status='published')
+            guide = dict(id=make_id('g'), ownerId=user['id'], name=name, city=city, headline=headline, bio=bio, cover=cover, gallery=[cover, '/assets/images/gallery-cafe.jpg', '/assets/images/gallery-tea.jpg'], avatarTone=tone, avatarUrl=user.get('avatarUrl', ''), verified=False, featured=False, rating=5, reviewCount=0, orders=0, responseTime='新入驻 · 24 小时内回复', responseRate='新入驻', languages=languages, services=services, tags=[city + '本地人'] + services[:2], highlights=highlights, idealFor=['第一次来' + city, '朋友 / 情侣出行', '想轻松玩的人'], price=price, packages=make_packages(city, price, itineraries), reviews=[], createdAt=now_iso(), status='published')
             db['guides'].insert(0, guide)
             save()
             return 201, {'guide': public_guide(guide, user)}

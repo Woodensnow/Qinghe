@@ -63,3 +63,27 @@
 - 参数 54,678 → 219,174；3072 对 CPU 推理 69 → 117 ms
 - 全部 46 个测试通过
 - 未解决：超过 256 字的简介尾部仍被截断；晋级检查只对比 v1，v3 对比为人工补测
+
+---
+
+# AI 帮我写：简介、亮点和套餐行程（后端）
+
+权威说明：开放 PR #2 的 `docs/AI_ITINERARY.md`（与口头简报冲突时以文档为准）。本 PR 只做文档第 7 节的 1–3 步，不含前端。
+
+计划：
+- [x] `server/ai_draft.py`：本地规则引擎。简介复用 `polish_text`；亮点按关键词和服务类型凑满 3 条（每条 ≤ 20 字）；行程只抽取原文里的地点，不够用「沿途散步 / 自由拍照 / 休息 / 根据你的兴趣现场调整」补位；时间递增且不超过套餐时长，傍晚从 17:00 起
+- [x] `server/polish_providers.py`：`draft()`、`draft_system_prompt()`（只许 JSON）、`parse_draft()`（类型、数量、长度、时间、顺序、时长、不接地的地点、多余字段都不通过，失败走现有回退）
+- [x] `POST /api/ai/profile-draft`：登录检查持锁，生成不持锁；`part` 只接受文档里的 `all|bio|highlights|itinerary`（行程按一整块重写，不按单个套餐）
+- [x] `POST /api/guides` 接收可选 `highlights` 和 `itineraries`，`make_packages` 写入 `key` 和 `itinerary`
+- [x] 测试：本地引擎、校验器、接口、一条「生成 → 发布 → 详情」旅程
+- [x] 跑完整 unittest，更新 README 的接口说明和测试数量
+
+## 结果（2026-11-09）
+- 已 rebase 到含 `docs/AI_ITINERARY.md` 的 main（PR #2）。`part` 只用文档里的四个值，没有做按单个套餐重写
+- 本地引擎对示例原文抽出「人民公园」「玉林路」，不写鹤鸣茶社、宽窄巷子；模型输出对不上就回退，并带 `fallbackFrom`
+- `python3 -m unittest discover -s tests -v`：81 项通过，12 项因未安装 PyTorch 跳过（原 65 + 新增 16）
+- 本 PR 只有后端。发布页按钮和详情页时间线留给前端 PR
+
+## 审核跟进（2026-11-09）
+- [x] `POST /api/ai/profile-draft` 按用户限流（无用户 id 时按 IP），默认 60 秒 8 次，可用 `QINGHE_DRAFT_RATE_LIMIT` / `QINGHE_DRAFT_RATE_WINDOW` 调整；超出返回 429。本地引擎和外部模型共用额度
+- [x] `variant` 不再把超大整数转成 float。不是 0–20 的整数时返回 400，而不是 500
