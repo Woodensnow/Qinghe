@@ -39,11 +39,23 @@ SERVICE_LINES = {
     '周边包车': '周边一天我来安排',
 }
 FALLBACK_HIGHLIGHTS = ('按你的节奏慢慢逛', '出发前先聊清楚', '随时可以调整路线')
-PLACE_SUFFIX = r'(?:公园|市场|街道|大街|巷子|路|街|巷|寺|馆|山|湖)'
+# Longer endings come first. Single-character tails catch 太古里 / 鹤鸣茶社 / 宽窄巷子里的园、楼、桥.
+PLACE_SUFFIXES = (
+    '风景区', '景区', '古镇', '古城', '茶社', '茶楼', '茶馆', '咖啡馆', '餐厅', '饭店', '饭馆',
+    '酒吧', '酒馆', '广场', '公园', '乐园', '市场', '夜市', '街道', '大街', '街区', '巷子', '商圈',
+    '路', '街', '巷', '寺', '馆', '庙', '山', '湖', '河', '湾', '桥', '塔', '楼', '店', '园', '里',
+)
+PLACE_SUFFIX = '(?:' + '|'.join(PLACE_SUFFIXES) + ')'
 SPAN = re.compile(r'(?:去|在|逛|到)([^，。！？\n]{1,40})')
 PLACE_IN_SPAN = re.compile(r'[\u4e00-\u9fff]{1,8}' + PLACE_SUFFIX)
 PLACE_MENTION = re.compile(r'[\u4e00-\u9fff]{2,8}' + PLACE_SUFFIX)
 CONNECTOR = re.compile(r'和|与|以及|还有|、')
+LEADING_PLACE = re.compile(r'^(?:去|在|逛|到|了|的|过|从|沿|来|想|常|爱|把|往|向)+')
+TRAILING_PLACE = re.compile(r'(?:里|内|中|上|边|附近)$')
+NOT_VENUES = frozenset({
+    '这里', '那里', '哪里', '里面', '心里', '夜里', '下楼', '上楼',
+    '赶路', '走路', '沿路', '一路',
+})
 
 
 def package_plan(keys, variant=0):
@@ -72,11 +84,30 @@ def extract_places(notes):
     return found
 
 
+def _ends_with_suffix(name):
+    return any(name.endswith(suffix) for suffix in PLACE_SUFFIXES)
+
+
+def _tighten_place(name):
+    """Drop leading verbs and a trailing 里/附近 when a real venue ending remains."""
+    trimmed = LEADING_PLACE.sub('', name)
+    while trimmed != name:
+        name = trimmed
+        trimmed = LEADING_PLACE.sub('', name)
+    stem = TRAILING_PLACE.sub('', name)
+    if stem != name and _ends_with_suffix(stem):
+        name = stem
+    return name
+
+
 def mentioned_places(text):
-    """Venue-like names inside a sentence. Ordinary words such as 不赶路 are ignored."""
+    """Venue-like names inside a sentence. Ordinary words such as 不赶路 and 这里 are ignored."""
     names = []
-    for name in PLACE_MENTION.findall(text or ''):
-        if '不赶' in name or name in {'赶路', '走路', '沿路', '一路'}:
+    for raw in PLACE_MENTION.findall(text or ''):
+        if '不赶' in raw:
+            continue
+        name = _tighten_place(raw)
+        if len(name) < 2 or name in NOT_VENUES or not _ends_with_suffix(name):
             continue
         if name not in names:
             names.append(name)
@@ -126,10 +157,10 @@ def choose_count(place_count, variant):
 
 
 def spread_times(start, hours, count):
-    """Evenly spaced minutes. The three package lengths divide cleanly for 3–5 nodes."""
+    """Evenly spaced minutes. The last stop starts at least 30 minutes before the package ends."""
     if count <= 1:
         return [start]
-    step = (hours * 60) // (count - 1)
+    step = (hours * 60 - 30) // (count - 1)
     return [start + step * index for index in range(count)]
 
 

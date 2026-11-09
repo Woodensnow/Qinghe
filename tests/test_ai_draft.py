@@ -29,7 +29,7 @@ class LocalDraftTests(unittest.TestCase):
             self.assertLessEqual(len(nodes), 5)
             times = [minutes(node['time']) for node in nodes]
             self.assertEqual(times, sorted(set(times)))
-            self.assertLessEqual(times[-1] - times[0], HOURS[key] * 60)
+            self.assertLessEqual(times[-1] - times[0], HOURS[key] * 60 - 30)
             if key == 'evening':
                 self.assertGreaterEqual(times[0], 17 * 60)
             for node in nodes:
@@ -57,6 +57,26 @@ class LocalDraftTests(unittest.TestCase):
         self.assertEqual(set(ai_draft.draft_profile(NOTES, '成都', part='bio')), {'bio'})
         self.assertEqual(set(ai_draft.draft_profile(NOTES, '成都', part='highlights')), {'highlights'})
         self.assertEqual(set(ai_draft.draft_profile(NOTES, '成都', part='itinerary')), {'itineraries'})
+
+    def test_last_stop_starts_thirty_minutes_before_the_end(self):
+        for hours, count in ((4, 3), (4, 4), (4, 5), (8, 3), (8, 5), (3, 3), (3, 5)):
+            start = 10 * 60
+            times = ai_draft.spread_times(start, hours, count)
+            self.assertEqual((times[0], len(times)), (start, count))
+            self.assertEqual(times, sorted(set(times)))
+            self.assertLessEqual(times[-1], start + hours * 60 - 30)
+        draft = ai_draft.draft_profile(NOTES, '成都', ['城市漫步'])
+        ends = {'half': 14 * 60, 'full': 17 * 60, 'evening': 20 * 60}
+        for key, nodes in draft['itineraries'].items():
+            self.assertLessEqual(minutes(nodes[-1]['time']), ends[key] - 30)
+
+    def test_generic_nodes_are_not_read_as_venues(self):
+        for place, activity in ai_draft.FILLERS:
+            self.assertEqual(ai_draft.mentioned_places(place), [])
+            self.assertEqual(ai_draft.mentioned_places(activity), [])
+        self.assertEqual(ai_draft.mentioned_places('去鹤鸣茶社喝茶'), ['鹤鸣茶社'])
+        self.assertEqual(ai_draft.mentioned_places('逛太古里'), ['太古里'])
+        self.assertEqual(ai_draft.mentioned_places('在人民公园里走走'), ['人民公园'])
 
     def test_missing_places_stay_generic(self):
         notes = '我喜欢慢慢走路，也喜欢发呆和聊天。'
