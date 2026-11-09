@@ -81,11 +81,17 @@ class LocalDraftTests(unittest.TestCase):
                      '下午上楼休息一下', '然后就地休息', '可以慢慢往前走'):
             self.assertEqual(ai_draft.mentioned_places(text), [], text)
 
+    def test_quarter_hour_midpoint_rounds_up(self):
+        self.assertEqual(ai_draft._quarter_hour(7.5), 15)
+        self.assertEqual(ai_draft._quarter_hour(22.5), 30)
+        self.assertEqual(ai_draft._quarter_hour(7), 0)
+        self.assertEqual(ai_draft._quarter_hour(8), 15)
+
     def test_stop_times_use_quarter_hours(self):
         start = 10 * 60
         times = ai_draft.spread_times(start, 3, 5)
         self.assertEqual([ai_draft.format_time(minute) for minute in times],
-                         ['10:00', '10:30', '11:15', '11:45', '12:30'])
+                         ['10:00', '10:45', '11:15', '12:00', '12:30'])
         self.assertNotIn(start + 37, times)
         for hours, count in ((4, 3), (4, 5), (8, 3), (8, 5), (3, 3), (3, 5)):
             series = ai_draft.spread_times(start, hours, count)

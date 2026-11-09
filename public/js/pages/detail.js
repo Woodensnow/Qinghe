@@ -1,5 +1,7 @@
 import { api, ApiError } from '../api.js?v=1.7.0';
 import { requireAuth } from '../components/auth-modal.js?v=1.7.0';
+import { itineraryToggle } from '../components/itinerary-timeline.js?v=1.8.0';
+import { readPackageItinerary } from '../itinerary.js?v=1.8.0';
 import { currentUrl, navigate } from '../router.js?v=1.7.0';
 import {
   addDays,
@@ -89,6 +91,19 @@ function dateChips(selectedDate) {
       </button>`
     )
     .join('');
+}
+
+function mountItineraries(root, guide) {
+  const packages = Array.isArray(guide?.packages) ? guide.packages : [];
+  const options = [...root.querySelectorAll('[data-package-option]')];
+  packages.forEach((pkg, index) => {
+    const nodes = readPackageItinerary(pkg);
+    if (!nodes.length) return;
+    const copy = options[index]?.querySelector('.package-copy');
+    if (!copy || copy.querySelector('.package-itinerary')) return;
+    const view = itineraryToggle(nodes);
+    if (view) copy.append(view);
+  });
 }
 
 function packageOptions(guide, selectedId) {
@@ -473,6 +488,7 @@ export async function renderGuideDetail(root, route) {
   setPageTitle(`${guide.name} · ${guide.city}地陪`);
   const trip = takeTripDate();
   root.innerHTML = detailShell(guide, trip.date);
+  mountItineraries(root, guide);
   if (trip.rejected) toast('出发日期需要在今天起 180 天内，已改为明天。', 'error');
   initReveals(root);
 

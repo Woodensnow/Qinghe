@@ -30,3 +30,7 @@ Each member should understand their claimed contribution, independently check th
 ## 优化实验
 
 Codex 进一步协助统一训练/验证指标、按人物和主题句模板划分、从潜在偏好生成标签、早停、梯度裁剪、结构化相容性特征、候选域训练、三种子集成及 NDCG 评价。第一轮未通过晋级的试验也保留；第二轮只按验证结果选择，再用新的合成确认集验收。所有结果仍属于规则蒸馏，未采集或编造真实反馈。详见 OPTIMIZATION.md。
+
+## 地陪主页草稿（运行时）
+
+发布页的「AI 帮我写」调用已有的 `POST /api/ai/profile-draft`。不配置模型时走 `server/ai_draft.py` 的本地规则引擎，界面会注明「本地 AI 引擎」。没有新增密钥或依赖。详情页只在套餐自己带有 `itinerary` 数组时展开时间线；旧数据没有该字段时不显示。生成文字写入页面时走 `textContent` 或转义，不把模型输出拼进 HTML。

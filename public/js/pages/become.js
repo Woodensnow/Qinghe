@@ -1,5 +1,7 @@
 import { api, ApiError } from '../api.js?v=1.7.0';
+import { applyDraft, bindDraftEditor, draftEditorHTML, openDraftModal, readDraft } from '../components/ai-draft.js?v=1.8.0';
 import { openPolishModal } from '../components/ai-polish.js?v=1.7.0';
+import { validateHighlights, validateItineraries } from '../itinerary.js?v=1.8.0';
 import { compressImageFile } from '../image.js?v=1.7.0';
 import { openAuthModal } from '../components/auth-modal.js?v=1.7.0';
 import { navigate } from '../router.js?v=1.7.0';
@@ -93,11 +95,15 @@ function formShell(user, meta) {
             <textarea name="bio" rows="6" maxlength="600" placeholder="说说你在这座城市生活了多久、喜欢带朋友去哪里、你的节奏是什么样的。真诚比华丽更有用。"></textarea>
           </span>
           <div class="ai-assist-row">
-            <span class="field-hint">至少 20 个字，建议写 2–3 段。</span>
-            <button type="button" class="ai-assist-btn" data-ai-polish>${icon('sparkles')} AI 润色</button>
+            <span class="field-hint">至少 20 个字。写两三句真实经历，也可以让 AI 写成完整主页。</span>
+            <span class="ai-assist-actions">
+              <button type="button" class="ai-assist-btn" data-ai-polish>${icon('sparkles')} AI 润色</button>
+              <button type="button" class="ai-assist-btn ai-assist-btn--primary" data-ai-draft>${icon('sparkles')} AI 帮我写</button>
+            </span>
           </div>
           <span class="field-error" data-error-for="bio"></span>
         </label>
+        ${draftEditorHTML()}
       </div>
 
       <div class="form-section">
@@ -425,6 +431,14 @@ export function renderBecome(root) {
     if (!Number.isFinite(price) || price < 50 || price > 3000) return setError('price', '价格需要在 ¥50–¥3000 之间'), false;
     if (!cover) return setError('cover', '请选择一张封面图'), false;
     if (!agree) return setError('agree', '请先阅读并同意社区公约'), false;
+    const draft = readDraft(form);
+    const highlights = validateHighlights(draft.highlights);
+    const routes = validateItineraries(draft.itineraries);
+    if (!highlights.ok || !routes.ok) {
+      const editor = form.querySelector('[data-draft-editor]');
+      if (editor) editor.open = true;
+      return setError(highlights.ok ? 'itineraries' : 'highlights', highlights.ok ? routes.message : highlights.message), false;
+    }
     return true;
   };
 
@@ -542,6 +556,8 @@ export function renderBecome(root) {
     }
   });
 
+  bindDraftEditor(form);
+
   form.querySelector('[data-ai-polish]')?.addEventListener('click', () => {
     openPolishModal({
       text: form.elements.bio.value,
@@ -555,8 +571,26 @@ export function renderBecome(root) {
     });
   });
 
+  form.querySelector('[data-ai-draft]')?.addEventListener('click', () => {
+    const city = form.elements.city.value;
+    if (!city) {
+      setError('city', '请选择你生活的城市');
+      form.elements.city.focus();
+      toast('请先选择你生活的城市', 'info');
+      return;
+    }
+    openDraftModal({
+      notes: form.elements.bio.value,
+      city,
+      services: selectedValues('services'),
+      onApply: (draft) => applyDraft(form, draft)
+    });
+  });
+
   form.addEventListener('input', (event) => {
     if (event.target.name) setError(event.target.name, '');
+    if (event.target.closest('[data-draft-highlights]')) setError('highlights', '');
+    if (event.target.closest('[data-node-list]')) setError('itineraries', '');
     counters();
     updatePreview();
   });
@@ -578,6 +612,15 @@ export function renderBecome(root) {
     publishButton.innerHTML = '<span class="spinner"></span><span>正在发布…</span>';
 
     try {
+      const draft = readDraft(form);
+      const highlights = validateHighlights(draft.highlights);
+      const routes = validateItineraries(draft.itineraries);
+      if (!highlights.ok || !routes.ok) {
+        setError(highlights.ok ? 'itineraries' : 'highlights', highlights.ok ? routes.message : highlights.message);
+        publishButton.disabled = false;
+        publishButton.innerHTML = original;
+        return;
+      }
       const payload = {
         name: form.elements.name.value.trim(),
         city: form.elements.city.value,
@@ -587,8 +630,10 @@ export function renderBecome(root) {
         cover: form.querySelector('input[name="cover"]:checked').value,
         avatarTone: form.querySelector('input[name="avatarTone"]:checked')?.value || session.user.avatarTone,
         services: selectedValues('services'),
-        languages: selectedValues('languages')
+        languages: selectedValues('languages'),
+        itineraries: routes.itineraries
       };
+      if (!highlights.omit) payload.highlights = highlights.highlights;
       const { guide } = await api('/api/guides', { method: 'POST', body: payload });
       toast('发布成功，旅人已经可以看到你的服务了');
       navigate(`/guides/${encodeURIComponent(guide.id)}`);
