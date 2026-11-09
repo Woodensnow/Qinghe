@@ -232,5 +232,102 @@ class ApiTests(ApiFixture):
             process.communicate(timeout=10)
 
 
+NOTES = '我在成都长大，喜欢泡茶馆、吃苍蝇馆子，周末常去人民公园和玉林路。'
+
+
+class ProfileDraftTests(ApiFixture):
+    def guide_body(self, **changes):
+        body = dict(name='成阿禾', city='成都', headline='人民公园喝茶，玉林路吃馆子',
+                    bio='我在成都长大，喜欢泡茶馆，周末常去人民公园和玉林路，想按你的节奏慢慢走。',
+                    price=180, cover=server.CATALOG['COVER_PRESETS'][0]['value'],
+                    services=['美食探店', '城市漫步'], languages=['中文'])
+        body.update(changes)
+        return body
+
+    def test_profile_draft_happy_path_and_parts(self):
+        self.login()
+        started = time.monotonic()
+        status, body, _ = self.request('POST', '/api/ai/profile-draft', dict(
+            notes=NOTES, city='成都', services=['美食探店', '城市漫步'],
+            packages=[dict(key='half', name='半日轻游', duration='4 小时'),
+                      dict(key='full', name='全天深度游', duration='8 小时'),
+                      dict(key='evening', name='傍晚轻陪游', duration='3 小时')]))
+        self.assertEqual(status, 200)
+        self.assertLess(time.monotonic() - started, 3)
+        self.assertEqual((body['provider'], body['engine'], body['model'], body['fallbackFrom']), ('local', 'local', '', ''))
+        self.assertEqual(body['highlights'], ['带你去泡老茶馆', '按你的口味去探店', '不赶路的城市漫步'])
+        self.assertEqual(set(body['itineraries']), {'half', 'full', 'evening'})
+        for key, nodes in body['itineraries'].items():
+            self.assertTrue(3 <= len(nodes) <= 5)
+            for node in nodes:
+                self.assertTrue(node['place'] in NOTES or node['place'] in polish_providers.GENERIC_PLACES)
+            if key == 'evening':
+                self.assertGreaterEqual(nodes[0]['time'], '17:00')
+        for part, field in (('bio', 'bio'), ('highlights', 'highlights'), ('itinerary', 'itineraries')):
+            status, partial, _ = self.request('POST', '/api/ai/profile-draft', dict(notes=NOTES, city='成都', part=part, variant=1))
+            self.assertEqual(status, 200)
+            self.assertIn(field, partial)
+            self.assertFalse({'bio', 'highlights', 'itineraries'} - {field} & set(partial))
+
+    def test_profile_draft_rejects_bad_input_and_requires_login(self):
+        self.assertEqual(self.request('POST', '/api/ai/profile-draft', dict(notes=NOTES, city='成都'), token='bad')[0], 401)
+        self.login()
+        self.assertEqual(self.request('POST', '/api/ai/profile-draft', dict(notes='太短', city='成都'))[0], 400)
+        self.assertEqual(self.request('POST', '/api/ai/profile-draft', dict(notes='城' * 301, city='成都'))[0], 400)
+        self.assertEqual(self.request('POST', '/api/ai/profile-draft', dict(notes='城' * 6, city='成都'))[0], 200)
+        self.assertEqual(self.request('POST', '/api/ai/profile-draft', dict(notes='城' * 300, city='成都'))[0], 200)
+        self.assertEqual(self.request('POST', '/api/ai/profile-draft', dict(notes=NOTES, city='火星'))[0], 400)
+        self.assertEqual(self.request('POST', '/api/ai/profile-draft', dict(notes=NOTES, city='成都', part='intro'))[0], 400)
+        self.assertEqual(self.request('GET', '/api/ai/profile-draft')[0], 405)
+
+    def test_profile_draft_falls_back_when_provider_fails(self):
+        self.login()
+        quiet = patch('sys.stderr')
+        quiet.start()
+        self.addCleanup(quiet.stop)
+
+        @polish_providers.register('draft-broken')
+        class Broken(polish_providers.PolishProvider):
+            def polish(self, request):
+                return ''
+
+            def draft(self, request):
+                return '{"place": "宽窄巷子"}'
+        self.addCleanup(polish_providers.PROVIDERS.pop, 'draft-broken', None)
+        os.environ['QINGHE_POLISH_PROVIDER'] = 'draft-broken'
+        os.environ['QINGHE_POLISH_MODEL'] = 'stub'
+        status, body, _ = self.request('POST', '/api/ai/profile-draft', dict(notes=NOTES, city='成都', services=['城市漫步']))
+        self.assertEqual(status, 200)
+        self.assertEqual((body['provider'], body['fallbackFrom']), ('local', 'draft-broken'))
+        for nodes in body['itineraries'].values():
+            for node in nodes:
+                self.assertTrue(node['place'] in NOTES or node['place'] in polish_providers.GENERIC_PLACES)
+                self.assertNotIn('宽窄巷子', node['place'] + node['activity'])
+        os.environ['QINGHE_POLISH_FALLBACK'] = 'off'
+        status, body, _ = self.request('POST', '/api/ai/profile-draft', dict(notes=NOTES, city='成都'))
+        self.assertEqual((status, body['message']), (502, 'AI 生成服务暂时不可用，请稍后再试'))
+
+    def test_guide_highlights_and_itineraries_are_optional(self):
+        self.login()
+        status, draft, _ = self.request('POST', '/api/ai/profile-draft', dict(notes=NOTES, city='成都', services=['美食探店']))
+        self.assertEqual(status, 200)
+        created = self.request('POST', '/api/guides', self.guide_body(
+            bio=draft['bio'], highlights=draft['highlights'], itineraries=draft['itineraries']))
+        self.assertEqual(created[0], 201, created[1])
+        packages = created[1]['guide']['packages']
+        self.assertEqual([package['key'] for package in packages], ['half', 'full', 'evening'])
+        for package in packages:
+            self.assertEqual(package['itinerary'], draft['itineraries'][package['key']])
+        plain = self.request('POST', '/api/guides', self.guide_body(name='另一位向导'))
+        self.assertEqual(plain[0], 201, plain[1])
+        self.assertEqual(plain[1]['guide']['highlights'], ['成都本地人私藏路线', '不赶路的轻松节奏', '出发前一对一沟通'])
+        self.assertTrue(all('itinerary' not in package for package in plain[1]['guide']['packages']))
+        rejected = self.request('POST', '/api/guides', self.guide_body(name='坏亮点', highlights=['太' * 21, '甲', '乙']))
+        self.assertEqual(rejected[0], 400)
+        bad_time = self.request('POST', '/api/guides', self.guide_body(name='坏时间', itineraries=draft['itineraries'] | {
+            'evening': [dict(node, time='下午') for node in draft['itineraries']['evening']]}))
+        self.assertEqual(bad_time[0], 400)
+
+
 if __name__ == '__main__':
     unittest.main()

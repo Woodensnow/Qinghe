@@ -174,6 +174,7 @@ export QINGHE_POLISH_PROVIDER=openai QINGHE_POLISH_MODEL=你的模型名 QINGHE_
 - `QINGHE_POLISH_FALLBACK=off` 时，配置错误返回 503，超时返回 504，其他失败返回 502。
 - 模型输出会去掉代码块、引号、`<think>` 等包装，并按场景字数上限（简介 160 / 地陪介绍 600）裁剪。
 - 调用模型期间不占用全局数据锁，慢模型不会卡住网站其他请求。
+- 同一套提供方也用于「AI 帮我写」：`POST /api/ai/profile-draft`。模型必须只返回 JSON；格式、字数、行程时间或地点对不上时自动改用本地引擎。不配置模型时本地引擎即可离线生成。
 
 新增提供方只需在 `server/polish_providers.py` 里写一个类并注册：
 
@@ -260,6 +261,7 @@ class MyProvider(PolishProvider):
 - **后端**：Python 标准库 `http.server`；基础功能零第三方依赖；神经匹配使用 PyTorch / NumPy
 - **数据**：`server/data.json` 文件持久化（不是数据库）
 - **AI 润色**：默认使用本地轻量文本引擎，不依赖外部 API Key，保留原意并优化标点、节奏与表达；可通过环境变量接入 OpenAI 兼容接口、Ollama、Claude 等模型，见 [AI 润色模型接入](#ai-润色模型接入)
+- **AI 帮我写**（后端）：本地人写 6–300 字，生成简介、正好 3 条亮点和三个套餐的行程。行程地点只来自原文，不够时用「沿途散步」这类节点补位。`part` 可单独重写 `bio` / `highlights` / `itinerary`
 - **上传**：本地图片压缩后写入 `public/uploads/`，用户资料中保存文件地址
 - **图片安全**：仅接受 JPG / PNG / WebP，校验文件头、限制 5MB，不使用可执行 SVG
 - **封面导入**：成为地陪时可直接从本地相册导入封面，客户端自动压缩后上传，服务端校验文件存在后写入服务
@@ -321,7 +323,8 @@ qinghe/
     ├── models/              # 教学模型权重与训练报告
     ├── auth_utils.py         # scrypt / token
     ├── ai_polish.py          # 本地文本润色引擎
-    ├── polish_providers.py   # 润色提供方接口、配置与外部模型接入
+    ├── ai_draft.py           # 本地简介、亮点与行程草稿
+    ├── polish_providers.py   # 润色与草稿的提供方接口、配置与外部模型接入
     └── data.json             # 业务数据，首次启动自动生成
 ```
 
@@ -340,13 +343,14 @@ qinghe/
 | POST | `/api/conversations/:id/messages` | 发送私聊消息（需登录） |
 | GET | `/api/messages/unread` | 当前用户未读总数（需登录） |
 | POST | `/api/ai/polish` | 对个人简介 / 地陪介绍进行 AI 润色，响应注明实际使用的 `provider` / `model`（需登录） |
+| POST | `/api/ai/profile-draft` | 根据 `notes`（6–300 字）、`city`、可选 `services` / `packages` / `part` / `variant` 生成 `bio`、3 条 `highlights` 和套餐 `itineraries`。`part` 为 `all`（默认）、`bio`、`highlights` 或 `itinerary`。响应带 `provider`、`model`、`fallbackFrom`（需登录） |
 | POST | `/api/profile/photo` | 上传头像 / 封面 / 照片（需登录） |
 | DELETE | `/api/profile/photo` | 移除头像 / 封面 / 照片（需登录） |
 | GET | `/api/meta` | 城市、服务、语言、封面、演示账号等元信息 |
 | GET | `/api/guides` | 地陪列表，支持筛选与排序 |
 | GET | `/api/guides/:id` | 地陪详情 |
 | POST | `/api/uploads` | 上传地陪封面等临时图片（需登录） |
-| POST | `/api/guides` | 发布地陪服务（需登录） |
+| POST | `/api/guides` | 发布地陪服务（需登录）。可选 `highlights`（3 条，每条 ≤ 20 字）和 `itineraries`（`half` / `full` / `evening` 的时间线）；不传时亮点用默认文案，套餐不带 `itinerary` |
 | PATCH | `/api/guides/:id` | 暂停 / 恢复接单（仅发布者） |
 | GET | `/api/guides/mine` | 我发布的服务（需登录） |
 | POST | `/api/bookings` | 创建预约（需登录） |
@@ -392,4 +396,4 @@ python tools/package_project.py --group 3
 
 双边匹配的旅人需求保存在 `server/data.json` 的 `matchTrips`，地陪偏好保存在服务的 `matchPreferences`。提交打包仍排除这些现有业务数据；模型权重仅来自合成样例，会随源码包提供。
 
-模型优化的对照实验、训练/验证曲线、候选误差与排序结果、失败尝试及计算开销见 [优化报告](docs/OPTIMIZATION.md)。测试套件现有 65 项；未安装 PyTorch 时，其中的神经匹配用例会跳过。
+模型优化的对照实验、训练/验证曲线、候选误差与排序结果、失败尝试及计算开销见 [优化报告](docs/OPTIMIZATION.md)。测试套件现有 81 项；未安装 PyTorch 时，其中的神经匹配用例会跳过。

@@ -295,3 +295,24 @@ class UserJourneys(ApiFixture):
                 self.assertEqual([c['id'] for c in self.inbox(returned)], [conversation['id']])
                 thread = self.api('GET', f'/api/conversations/{conversation["id"]}/messages', actor=returned)
                 self.assertEqual([m['body'] for m in thread['messages']], [message])
+
+    def test_two_sentences_become_a_published_itinerary(self):
+        """本地人写两句话，生成简介和行程，采用后详情里能看到每个套餐的时间线。"""
+        owner = self.join('成阿禾', 'chengdu-guide@example.cn')
+        notes = '我在成都长大，喜欢泡茶馆、吃苍蝇馆子，周末常去人民公园和玉林路。'
+        draft = self.api('POST', '/api/ai/profile-draft', dict(
+            notes=notes, city='成都', services=['美食探店', '城市漫步'], part='all'), owner)
+        self.assertEqual(draft['provider'], 'local')
+        self.assertEqual(len(draft['highlights']), 3)
+        guide = self.publish(owner, name='成阿禾', city='成都', headline='人民公园喝茶，玉林路吃馆子',
+                             bio=draft['bio'], services=['美食探店', '城市漫步'],
+                             highlights=draft['highlights'], itineraries=draft['itineraries'])
+        detail = self.api('GET', '/api/guides/' + guide['id'])['guide']
+        self.assertEqual(detail['highlights'], draft['highlights'])
+        self.assertEqual(detail['bio'], draft['bio'])
+        self.assertEqual(len(detail['packages']), 3)
+        for package in detail['packages']:
+            self.assertEqual(package['itinerary'], draft['itineraries'][package['key']])
+            self.assertGreaterEqual(len(package['itinerary']), 3)
+            for node in package['itinerary']:
+                self.assertTrue(node['place'] in notes or node['place'] in ('沿途散步', '自由拍照', '休息', '根据你的兴趣现场调整'))

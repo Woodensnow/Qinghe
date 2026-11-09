@@ -14,8 +14,9 @@ from pathlib import Path
 from urllib.parse import parse_qs, unquote, urlsplit
 
 from auth_utils import hash_password, verify_password, make_id, make_token
+from ai_draft import PACKAGE_KEYS, PACKAGES as DRAFT_PACKAGES
 from ai_polish import LIMITS
-from polish_providers import PolishError, polish
+from polish_providers import DraftSchemaError, PolishError, draft, polish, validate_highlights, validate_itineraries
 from pricing import quote
 from store import data, save, LOCK, ROOT, now_iso
 
@@ -145,17 +146,28 @@ def rounded_package_price(amount):
     return math.floor(amount / 10 + .5) * 10
 
 
-def make_packages(city, price):
+def make_packages(city, price, itineraries=None):
     # Shorter packages must not cost more than longer ones. The evening floor of
     # ¥60 would otherwise exceed a half-day base of ¥50–¥59.
     half = price
     full = max(half, 80, rounded_package_price(price * 1.7))
     evening = min(half, max(60, rounded_package_price(price * .75)))
-    return [dict(id=make_id('pkg'), name=name, duration=duration, price=cost, description=description, includes=includes)
-            for name, duration, cost, description, includes in [
-                ('半日轻游', '4 小时', half, f'用半天时间，走一条不赶路的{city}本地路线。', ['一对一路线定制', '沿途讲解', '本地生活建议']),
-                ('全天深度游', '8 小时', full, f'从早到晚慢慢逛，把{city}的日常与风景一次收进旅程。', ['全天行程定制', '路线陪同', '餐饮与交通建议']),
-                ('傍晚轻陪游', '3 小时', evening, '下班后的城市散步，适合差旅途中偷得半日闲。', ['夜间路线', '拍照协助', '本地宵夜推荐'])]]
+    costs = dict(half=half, full=full, evening=evening)
+    details = {
+        'half': (f'用半天时间，走一条不赶路的{city}本地路线。', ['一对一路线定制', '沿途讲解', '本地生活建议']),
+        'full': (f'从早到晚慢慢逛，把{city}的日常与风景一次收进旅程。', ['全天行程定制', '路线陪同', '餐饮与交通建议']),
+        'evening': ('下班后的城市散步，适合差旅途中偷得半日闲。', ['夜间路线', '拍照协助', '本地宵夜推荐']),
+    }
+    packages = []
+    for spec in DRAFT_PACKAGES:
+        description, includes = details[spec['key']]
+        package = dict(id=make_id('pkg'), key=spec['key'], name=spec['name'], duration=spec['duration'],
+                       price=costs[spec['key']], description=description, includes=includes)
+        nodes = (itineraries or {}).get(spec['key'])
+        if nodes:
+            package['itinerary'] = [dict(time=node['time'], place=node['place'], activity=node['activity']) for node in nodes]
+        packages.append(package)
+    return packages
 
 
 class Handler(BaseHTTPRequestHandler):
@@ -231,12 +243,58 @@ class Handler(BaseHTTPRequestHandler):
             raise ApiError(error.status, error.message)
         return 200, result.to_json()
 
+    def draft_route(self):
+        check(self.command == 'POST', '请求方式不支持', status=405)
+        with LOCK:
+            self.current_user()
+        body = self.read_body()
+        notes = body.get('notes')
+        check(isinstance(notes, str), '请写 6 到 300 字，方便生成简介和行程', 'notes')
+        notes = notes.strip()
+        check(6 <= len(notes) <= 300, '请写 6 到 300 字，方便生成简介和行程', 'notes')
+        city = text(body.get('city'), 20)
+        check(city in CATALOG['CITIES'], '请选择服务城市', 'city')
+        services = body.get('services', [])
+        check(isinstance(services, list), '服务类型不正确', 'services')
+        chosen = []
+        for item in services:
+            check(isinstance(item, str) and item in CATALOG['SERVICE_TYPES'], '服务类型不正确', 'services')
+            if item not in chosen:
+                chosen.append(item)
+        raw_packages = body.get('packages')
+        if raw_packages is None:
+            package_keys = list(PACKAGE_KEYS)
+        else:
+            check(isinstance(raw_packages, list) and raw_packages, '套餐不正确', 'packages')
+            package_keys = []
+            for item in raw_packages:
+                key = item.get('key') if isinstance(item, dict) else None
+                check(key in PACKAGE_KEYS and key not in package_keys, '套餐不正确', 'packages')
+                package_keys.append(key)
+        part = text(body.get('part', 'all'), 20)
+        check(part in {'all', 'bio', 'highlights', 'itinerary'}, '生成范围不正确', 'part')
+        if 'variant' in body and body.get('variant') is not None:
+            variant = body.get('variant')
+            check(not isinstance(variant, bool) and isinstance(variant, (int, float)) and float(variant).is_integer(), '版本号不正确', 'variant')
+            variant = int(variant)
+            check(0 <= variant <= 20, '版本号不正确', 'variant')
+        else:
+            variant = 0
+        try:
+            result = draft(notes, city, chosen, package_keys, part, variant)
+        except PolishError as error:
+            messages = {502: 'AI 生成服务暂时不可用，请稍后再试', 503: 'AI 生成服务未正确配置', 504: 'AI 生成服务响应超时，请稍后再试'}
+            raise ApiError(error.status, messages.get(error.status, error.message))
+        return 200, result.to_json()
+
     def dispatch(self):
         try:
             url = urlsplit(self.path)
             if url.path == '/api/ai/polish':
                 # Model calls can be slow, so only the login check holds the store lock.
                 self.respond(*self.polish_route())
+            elif url.path == '/api/ai/profile-draft':
+                self.respond(*self.draft_route())
             elif url.path.startswith('/api/'):
                 # A complete read/modify/save cycle is serialized, matching the old
                 # single-process store and preventing lost updates between requests.
@@ -451,8 +509,21 @@ class Handler(BaseHTTPRequestHandler):
             check(languages, '请至少选择一种沟通语言', 'languages')
             check(usable_cover(cover), '请选择或导入一张有效的封面图', 'cover')
             check(tone in CATALOG['AVATAR_TONES'], '头像样式不正确', 'avatarTone')
+            if 'highlights' in body and body.get('highlights') is not None:
+                try:
+                    highlights = validate_highlights(body.get('highlights'))
+                except DraftSchemaError as error:
+                    raise ApiError(400, str(error), 'highlights')
+            else:
+                highlights = [city + '本地人私藏路线', '不赶路的轻松节奏', '出发前一对一沟通']
+            itineraries = None
+            if 'itineraries' in body and body.get('itineraries') is not None:
+                try:
+                    itineraries = validate_itineraries(body.get('itineraries'))
+                except DraftSchemaError as error:
+                    raise ApiError(400, str(error), 'itineraries')
             price = math.floor(price + .5)
-            guide = dict(id=make_id('g'), ownerId=user['id'], name=name, city=city, headline=headline, bio=bio, cover=cover, gallery=[cover, '/assets/images/gallery-cafe.jpg', '/assets/images/gallery-tea.jpg'], avatarTone=tone, avatarUrl=user.get('avatarUrl', ''), verified=False, featured=False, rating=5, reviewCount=0, orders=0, responseTime='新入驻 · 24 小时内回复', responseRate='新入驻', languages=languages, services=services, tags=[city + '本地人'] + services[:2], highlights=[city + '本地人私藏路线', '不赶路的轻松节奏', '出发前一对一沟通'], idealFor=['第一次来' + city, '朋友 / 情侣出行', '想轻松玩的人'], price=price, packages=make_packages(city, price), reviews=[], createdAt=now_iso(), status='published')
+            guide = dict(id=make_id('g'), ownerId=user['id'], name=name, city=city, headline=headline, bio=bio, cover=cover, gallery=[cover, '/assets/images/gallery-cafe.jpg', '/assets/images/gallery-tea.jpg'], avatarTone=tone, avatarUrl=user.get('avatarUrl', ''), verified=False, featured=False, rating=5, reviewCount=0, orders=0, responseTime='新入驻 · 24 小时内回复', responseRate='新入驻', languages=languages, services=services, tags=[city + '本地人'] + services[:2], highlights=highlights, idealFor=['第一次来' + city, '朋友 / 情侣出行', '想轻松玩的人'], price=price, packages=make_packages(city, price, itineraries), reviews=[], createdAt=now_iso(), status='published')
             db['guides'].insert(0, guide)
             save()
             return 201, {'guide': public_guide(guide, user)}
