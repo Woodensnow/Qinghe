@@ -7984,3 +7984,311 @@ a:focus:not(:focus-visible) {
 .match-score small { color: var(--muted); margin-bottom: 10px; }
 .matching-page [hidden] { display: none !important; }
 @media (max-width: 680px) { .match-result { grid-template-columns: 1fr; } .match-score { border-top: 1px solid var(--line); padding-top: 20px; } }
+
+/* =========================================================
+   AI 帮我写 · draft editor and package timelines
+   ========================================================= */
+.ai-assist-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 6px;
+}
+
+.ai-assist-btn--primary {
+  border-color: var(--green-700);
+  background: var(--green-700);
+  color: white;
+}
+
+.ai-assist-btn--primary .icon { color: white; }
+
+.ai-assist-btn--primary:hover {
+  border-color: var(--green-800);
+  background: var(--green-800);
+  color: white;
+}
+
+.draft-editor {
+  margin: 4px 0 16px;
+  border: 1px solid var(--green-200);
+  border-radius: 14px;
+  background: linear-gradient(180deg, var(--green-50), white 72px);
+}
+
+.draft-editor summary {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 16px;
+  cursor: pointer;
+  list-style: none;
+}
+
+.draft-editor summary::-webkit-details-marker { display: none; }
+
+.draft-editor summary::after {
+  content: "";
+  flex: 0 0 auto;
+  width: 7px;
+  height: 7px;
+  margin-left: 8px;
+  border-right: 1.5px solid var(--green-700);
+  border-bottom: 1.5px solid var(--green-700);
+  transform: rotate(45deg) translateY(-2px);
+}
+
+.draft-editor[open] summary::after { transform: rotate(225deg) translateY(-1px); }
+
+.draft-editor summary strong {
+  color: var(--ink);
+  font-size: 13px;
+}
+
+.draft-editor summary span {
+  color: var(--muted);
+  font-size: 10px;
+}
+
+.draft-editor-body { padding: 0 16px 16px; }
+
+.draft-highlights {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 6px 0 8px;
+}
+
+.draft-highlight {
+  display: grid;
+  grid-template-columns: 18px minmax(0, 1fr);
+  gap: 8px;
+  align-items: center;
+}
+
+.draft-highlight span {
+  color: var(--green-600);
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.draft-highlight input,
+.itinerary-node input {
+  width: 100%;
+  height: 38px;
+  padding: 0 10px;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  background: var(--paper);
+  color: var(--ink);
+  font-size: 12px;
+  outline: none;
+}
+
+.draft-highlight input:focus,
+.itinerary-node input:focus {
+  border-color: var(--green-400);
+  background: white;
+  box-shadow: 0 0 0 3px rgba(94, 165, 131, 0.1);
+}
+
+.draft-package {
+  margin-top: 10px;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: white;
+}
+
+.draft-package-head {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.draft-package-head strong { font-size: 12.5px; }
+.draft-package-head span { color: var(--muted-2); font-size: 10px; }
+.draft-package-head .text-link { margin-left: auto; font-size: 10.5px; }
+.draft-package-head .text-link:disabled {
+  color: var(--muted-2);
+  cursor: default;
+  text-decoration: none;
+}
+
+.itinerary-node {
+  display: grid;
+  grid-template-columns: 76px minmax(0, 0.9fr) minmax(0, 1.3fr) 34px;
+  gap: 6px;
+  margin-top: 6px;
+}
+
+.itinerary-node [data-remove-node] {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 38px;
+  padding: 0;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  background: white;
+  color: var(--muted);
+}
+
+.itinerary-node [data-remove-node] .icon { width: 14px; height: 14px; }
+.itinerary-node [data-remove-node]:disabled { opacity: 0.35; cursor: default; }
+
+.package-itinerary {
+  margin-top: 12px;
+  padding-top: 10px;
+  border-top: 1px dashed var(--line);
+}
+
+.itinerary-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 2px 0;
+  border: 0;
+  background: transparent;
+  color: var(--green-700);
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.itinerary-toggle .icon { width: 13px; height: 13px; }
+.itinerary-toggle .icon:last-child { transition: transform 0.2s var(--ease); }
+.itinerary-toggle.is-open .icon:last-child { transform: rotate(180deg); }
+
+.itinerary-timeline {
+  list-style: none;
+  margin: 8px 0 0;
+  padding: 0;
+}
+
+.itinerary-timeline li {
+  display: grid;
+  grid-template-columns: 52px minmax(0, 1fr);
+  gap: 8px;
+  position: relative;
+  padding: 0 0 12px 14px;
+}
+
+.itinerary-timeline li::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 7px;
+  bottom: -4px;
+  width: 1px;
+  background: var(--green-200);
+}
+
+.itinerary-timeline li::after {
+  content: "";
+  position: absolute;
+  left: -3px;
+  top: 6px;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--green-500);
+}
+
+.itinerary-timeline li:last-child { padding-bottom: 0; }
+.itinerary-timeline li:last-child::before { bottom: auto; height: 8px; }
+
+.itinerary-timeline time {
+  color: var(--green-700);
+  font-size: 11px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.itinerary-timeline strong {
+  display: block;
+  font-size: 12.5px;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+.itinerary-timeline li span {
+  display: block;
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 1.55;
+  overflow-wrap: anywhere;
+}
+
+.modal--ai-draft { width: min(760px, 100%); }
+
+.ai-draft-bio { white-space: pre-wrap; }
+
+.ai-draft-block {
+  margin-bottom: 12px;
+  padding: 12px 12px 10px;
+  border: 1px solid var(--green-200);
+  border-radius: 14px;
+  background: white;
+}
+
+.ai-draft-block.is-busy .ai-draft-block-body { opacity: 0.45; }
+
+.ai-draft-block-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.ai-draft-block-head strong { display: block; font-size: 13px; }
+.ai-draft-block-head small { color: var(--muted-2); font-size: 10px; }
+.ai-draft-block-head .btn { flex: 0 0 auto; }
+
+.ai-draft-block-status {
+  margin: 8px 0 0;
+  color: var(--green-700);
+  font-size: 11px;
+}
+
+.ai-draft-highlights {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.ai-draft-highlights li {
+  padding: 8px 10px;
+  border-radius: 10px;
+  background: var(--green-50);
+  color: var(--ink-2);
+  font-size: 12.5px;
+}
+
+.ai-draft-routes { display: flex; flex-direction: column; gap: 12px; }
+
+.ai-draft-route strong { display: block; margin-bottom: 4px; font-size: 12px; }
+.ai-draft-route p { margin: 0; color: var(--muted); font-size: 11px; }
+
+.ai-draft-problem:empty { display: none; }
+
+.ai-draft-services,
+.ai-draft-notes .field-hint { margin-top: 6px; }
+
+.ai-draft-error .field { width: min(100%, 460px); text-align: left; }
+.ai-draft-error .btn { margin-top: 4px; }
+
+@media (max-width: 680px) {
+  .ai-assist-actions { width: 100%; }
+  .ai-assist-actions .ai-assist-btn { flex: 1; justify-content: center; }
+  .draft-editor summary { align-items: flex-start; flex-direction: column; gap: 4px; }
+  .itinerary-node { grid-template-columns: 76px minmax(0, 1fr) 34px; }
+  .itinerary-node [data-node-activity] { grid-column: 1 / -1; }
+  .ai-draft-block-head { align-items: flex-start; flex-direction: column; }
+  .modal--ai-draft { width: 100%; }
+}

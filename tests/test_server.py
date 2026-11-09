@@ -84,7 +84,7 @@ class ApiTests(ApiFixture):
         self.assertEqual(status, 200)
         self.assertEqual(meta['regionCount'], 34)
         self.assertEqual(meta['cityCount'], 151)
-        for path in ('/', '/messages', '/guides/g_linxiaoman', '/js/app.js?v=1.7.0'):
+        for path in ('/', '/messages', '/guides/g_linxiaoman', '/js/app.js?v=1.8.0'):
             status, content, headers = self.request('GET', path, raw=True)
             self.assertEqual(status, 200)
             self.assertTrue(content)
@@ -328,6 +328,14 @@ class ProfileDraftTests(ApiFixture):
         bad_time = self.request('POST', '/api/guides', self.guide_body(name='坏时间', itineraries=draft['itineraries'] | {
             'evening': [dict(node, time='下午') for node in draft['itineraries']['evening']]}))
         self.assertEqual(bad_time[0], 400)
+        missing = {key: nodes for key, nodes in draft['itineraries'].items() if key != 'evening'}
+        rejected_route = self.request('POST', '/api/guides', self.guide_body(name='缺傍晚', itineraries=missing))
+        self.assertEqual((rejected_route[0], rejected_route[1].get('field')), (400, 'itineraries'))
+        status, detail, _ = self.request('GET', '/api/guides/g_linxiaoman')
+        self.assertEqual(status, 200)
+        for package in detail['guide']['packages']:
+            self.assertNotIn('key', package)
+            self.assertNotIn('itinerary', package)
 
     def test_variant_must_be_a_small_integer(self):
         self.login()

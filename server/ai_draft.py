@@ -176,7 +176,9 @@ def choose_count(place_count, variant):
 
 def _quarter_hour(minute):
     """Nearest 15-minute mark. Halves round away from the earlier mark."""
-    return ((int(minute) + 7) // 15) * 15
+    # Add the half-step before dividing. int(minute) first would turn 7.5 into 7,
+    # and 7 + 7 then falls short of the next quarter hour.
+    return int((minute + 7.5) // 15) * 15
 
 
 def spread_times(start, hours, count):
