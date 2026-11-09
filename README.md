@@ -175,7 +175,6 @@ export QINGHE_POLISH_PROVIDER=openai QINGHE_POLISH_MODEL=你的模型名 QINGHE_
 - 模型输出会去掉代码块、引号、`<think>` 等包装，并按场景字数上限（简介 160 / 地陪介绍 600）裁剪。
 - 调用模型期间不占用全局数据锁，慢模型不会卡住网站其他请求。
 - 同一套提供方也用于「AI 帮我写」：`POST /api/ai/profile-draft`。模型必须只返回 JSON；格式、字数、行程时间或地点对不上时自动改用本地引擎。不配置模型时本地引擎即可离线生成。
-- 这个接口按登录用户限流，没有用户 id 时按 IP。本地引擎和外部模型共用同一额度，默认每 60 秒 8 次。`QINGHE_DRAFT_RATE_LIMIT`、`QINGHE_DRAFT_RATE_WINDOW` 可改这两个数；超出返回 429「生成太频繁，请稍后再试」。`variant` 只能是 0 到 20 的整数。
 
 新增提供方只需在 `server/polish_providers.py` 里写一个类并注册：
 
@@ -344,7 +343,7 @@ qinghe/
 | POST | `/api/conversations/:id/messages` | 发送私聊消息（需登录） |
 | GET | `/api/messages/unread` | 当前用户未读总数（需登录） |
 | POST | `/api/ai/polish` | 对个人简介 / 地陪介绍进行 AI 润色，响应注明实际使用的 `provider` / `model`（需登录） |
-| POST | `/api/ai/profile-draft` | 根据 `notes`（6–300 字）、`city`、可选 `services` / `packages` / `part` / `variant`（0–20 的整数）生成 `bio`、3 条 `highlights` 和套餐 `itineraries`。`part` 为 `all`（默认）、`bio`、`highlights` 或 `itinerary`。响应带 `provider`、`model`、`fallbackFrom`。默认每分钟 8 次，超出返回 429（需登录） |
+| POST | `/api/ai/profile-draft` | 根据 `notes`（6–300 字）、`city`、可选 `services` / `packages` / `part` / `variant` 生成 `bio`、3 条 `highlights` 和套餐 `itineraries`。`part` 为 `all`（默认）、`bio`、`highlights` 或 `itinerary`。响应带 `provider`、`model`、`fallbackFrom`（需登录） |
 | POST | `/api/profile/photo` | 上传头像 / 封面 / 照片（需登录） |
 | DELETE | `/api/profile/photo` | 移除头像 / 封面 / 照片（需登录） |
 | GET | `/api/meta` | 城市、服务、语言、封面、演示账号等元信息 |
@@ -397,4 +396,4 @@ python tools/package_project.py --group 3
 
 双边匹配的旅人需求保存在 `server/data.json` 的 `matchTrips`，地陪偏好保存在服务的 `matchPreferences`。提交打包仍排除这些现有业务数据；模型权重仅来自合成样例，会随源码包提供。
 
-模型优化的对照实验、训练/验证曲线、候选误差与排序结果、失败尝试及计算开销见 [优化报告](docs/OPTIMIZATION.md)。测试套件现有 83 项；未安装 PyTorch 时，其中的神经匹配用例会跳过。
+模型优化的对照实验、训练/验证曲线、候选误差与排序结果、失败尝试及计算开销见 [优化报告](docs/OPTIMIZATION.md)。测试套件现有 81 项；未安装 PyTorch 时，其中的神经匹配用例会跳过。
