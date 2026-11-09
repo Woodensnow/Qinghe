@@ -395,6 +395,11 @@ class DraftParsingTests(ProviderTestCase):
         parsed = pp.parse_draft(shown, request)
         self.assertEqual(parsed['itineraries']['half'][1]['place'], '鹤鸣茶社')
         self.assertEqual(parsed['itineraries']['half'][1]['activity'], '去鹤鸣茶社喝茶')
+        ordinary = valid_draft()
+        ordinary['itineraries']['full'][0]['activity'] = '回到酒店休息'
+        ordinary['itineraries']['full'][1]['activity'] = '去朋友家里坐坐'
+        ordinary['itineraries']['full'][2]['activity'] = '傍晚到夜里'
+        self.assertEqual(pp.parse_draft(ordinary, draft_request())['itineraries']['full'][1]['activity'], '去朋友家里坐坐')
 
     def test_bad_provider_draft_falls_back_to_local(self):
         @pp.register('draft-broken')

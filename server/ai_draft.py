@@ -50,7 +50,15 @@ SPAN = re.compile(r'(?:去|在|逛|到)([^，。！？\n]{1,40})')
 PLACE_IN_SPAN = re.compile(r'[\u4e00-\u9fff]{1,8}' + PLACE_SUFFIX)
 PLACE_MENTION = re.compile(r'[\u4e00-\u9fff]{2,8}' + PLACE_SUFFIX)
 CONNECTOR = re.compile(r'和|与|以及|还有|、')
-LEADING_PLACE = re.compile(r'^(?:去|在|逛|到|了|的|过|从|沿|来|想|常|爱|把|往|向)+')
+# Longer words first so 回到 is consumed before a single 到.
+_LEADING_WORDS = (
+    '一会儿', '一会', '回到', '回去', '附近', '傍晚', '晚上', '下午', '上午',
+    '中午', '早上', '早晨', '凌晨', '然后', '接着', '最后', '我们', '一起',
+    '可以', '准备', '开始',
+    '去', '在', '逛', '到', '了', '的', '过', '从', '沿', '来', '想', '常', '爱',
+    '把', '往', '向', '就', '再', '又', '也', '还', '先',
+)
+LEADING_PLACE = re.compile('^(?:' + '|'.join(_LEADING_WORDS) + ')+')
 TRAILING_PLACE = re.compile(r'(?:里|内|中|上|边|附近)$')
 NOT_VENUES = frozenset({
     '这里', '那里', '哪里', '里面', '心里', '夜里', '下楼', '上楼',
@@ -84,16 +92,20 @@ def extract_places(notes):
     return found
 
 
+def _matched_suffix(name):
+    for suffix in PLACE_SUFFIXES:
+        if name.endswith(suffix):
+            return suffix
+    return ''
+
+
 def _ends_with_suffix(name):
-    return any(name.endswith(suffix) for suffix in PLACE_SUFFIXES)
+    return bool(_matched_suffix(name))
 
 
 def _tighten_place(name):
-    """Drop leading verbs and a trailing 里/附近 when a real venue ending remains."""
-    trimmed = LEADING_PLACE.sub('', name)
-    while trimmed != name:
-        name = trimmed
-        trimmed = LEADING_PLACE.sub('', name)
+    """Drop a run of leading verbs and a trailing 里/附近 when a real venue ending remains."""
+    name = LEADING_PLACE.sub('', name)
     stem = TRAILING_PLACE.sub('', name)
     if stem != name and _ends_with_suffix(stem):
         name = stem
@@ -101,13 +113,19 @@ def _tighten_place(name):
 
 
 def mentioned_places(text):
-    """Venue-like names inside a sentence. Ordinary words such as 不赶路 and 这里 are ignored."""
+    """Venue-like names inside a sentence. Ordinary words such as 不赶路 and 这里 are ignored.
+
+    A one-character ending (里、店、楼、园) only counts when at least two characters
+    sit in front of it, so 酒店 and 夜里 are not places. 家里 is "at home", not a venue.
+    """
     names = []
     for raw in PLACE_MENTION.findall(text or ''):
         if '不赶' in raw:
             continue
         name = _tighten_place(raw)
-        if len(name) < 2 or name in NOT_VENUES or not _ends_with_suffix(name):
+        suffix = _matched_suffix(name)
+        if (not suffix or len(name) < 2 or name in NOT_VENUES or name.endswith('家里')
+                or (len(suffix) == 1 and len(name) - len(suffix) < 2)):
             continue
         if name not in names:
             names.append(name)
@@ -156,12 +174,25 @@ def choose_count(place_count, variant):
     return count
 
 
+def _quarter_hour(minute):
+    """Nearest 15-minute mark. Halves round away from the earlier mark."""
+    return ((int(minute) + 7) // 15) * 15
+
+
 def spread_times(start, hours, count):
-    """Evenly spaced minutes. The last stop starts at least 30 minutes before the package ends."""
+    """Quarter-hour stops. The last one starts at least 30 minutes before the package ends."""
     if count <= 1:
         return [start]
-    step = (hours * 60 - 30) // (count - 1)
-    return [start + step * index for index in range(count)]
+    latest = start + hours * 60 - 30
+    span = latest - start
+    times = [_quarter_hour(start + span * index / (count - 1)) for index in range(count)]
+    times[0] = start
+    for index in range(1, count):
+        if times[index] <= times[index - 1]:
+            times[index] = times[index - 1] + 15
+    if times[-1] > latest:
+        times = [minute - (times[-1] - latest) for minute in times]
+    return times
 
 
 def format_time(minute):
