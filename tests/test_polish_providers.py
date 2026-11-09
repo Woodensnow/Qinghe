@@ -376,6 +376,31 @@ class DraftParsingTests(ProviderTestCase):
                     pp.parse_draft(payload, request)
                 self.assertIn(fragment, str(caught.exception))
 
+    def test_teahouse_and_compound_names_must_come_from_the_notes(self):
+        hidden = valid_draft()
+        hidden['itineraries']['half'][1]['activity'] = '去鹤鸣茶社喝茶'
+        with self.assertRaises(pp.ProviderResponseError) as caught:
+            pp.parse_draft(hidden, draft_request())
+        self.assertIn('没有的地点', str(caught.exception))
+        taikoo = valid_draft()
+        taikoo['itineraries']['evening'][1]['activity'] = '逛太古里'
+        with self.assertRaises(pp.ProviderResponseError):
+            pp.parse_draft(taikoo, draft_request())
+
+        notes = NOTES + '也常去鹤鸣茶社。'
+        request = pp.DraftRequest(notes, '成都', ('美食探店', '城市漫步'), tuple(pp.package_plan(('half', 'full', 'evening'))), 'all', 0)
+        shown = valid_draft()
+        shown['itineraries']['half'][1]['place'] = '鹤鸣茶社'
+        shown['itineraries']['half'][1]['activity'] = '去鹤鸣茶社喝茶'
+        parsed = pp.parse_draft(shown, request)
+        self.assertEqual(parsed['itineraries']['half'][1]['place'], '鹤鸣茶社')
+        self.assertEqual(parsed['itineraries']['half'][1]['activity'], '去鹤鸣茶社喝茶')
+        ordinary = valid_draft()
+        ordinary['itineraries']['full'][0]['activity'] = '回到酒店休息'
+        ordinary['itineraries']['full'][1]['activity'] = '去朋友家里坐坐'
+        ordinary['itineraries']['full'][2]['activity'] = '傍晚到夜里'
+        self.assertEqual(pp.parse_draft(ordinary, draft_request())['itineraries']['full'][1]['activity'], '去朋友家里坐坐')
+
     def test_bad_provider_draft_falls_back_to_local(self):
         @pp.register('draft-broken')
         class Broken(pp.PolishProvider):
