@@ -7,6 +7,7 @@ import os
 import random
 import re
 import signal
+import socket
 import sys
 import threading
 import time
@@ -653,11 +654,17 @@ class Handler(BaseHTTPRequestHandler):
         raise ApiError(404, '接口不存在')
 
 
+class Server(ThreadingHTTPServer):
+    # The stdlib backlog of 5 is too short: on macOS, connections that arrive
+    # together (a browser's parallel requests) are reset once it is full.
+    request_queue_size = socket.SOMAXCONN
+
+
 def main():
     host, port = os.environ.get('HOST', '127.0.0.1'), int(os.environ.get('PORT', '4173'))
     data()  # Validate existing data before accepting any requests.
     try:
-        server = ThreadingHTTPServer((host, port), Handler)
+        server = Server((host, port), Handler)
     except OSError as error:
         raise SystemExit(f'无法启动 {host}:{port}，请检查端口是否被占用：{error}')
     PID_FILE.write_text(str(os.getpid()), encoding='utf-8')

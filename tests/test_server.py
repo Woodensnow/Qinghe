@@ -41,7 +41,7 @@ class ApiFixture(unittest.TestCase):
         server.reset_draft_rate_limit()
         self.config = patch.object(polish_providers, 'CONFIG_FILE', Path(self.temp.name) / 'ai_polish.local.json')
         self.config.start()
-        self.http = server.ThreadingHTTPServer(('127.0.0.1', 0), server.Handler)
+        self.http = server.Server(('127.0.0.1', 0), server.Handler)
         self.thread = threading.Thread(target=self.http.serve_forever, daemon=True)
         self.thread.start()
         self.token = None
