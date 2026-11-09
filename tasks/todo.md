@@ -107,4 +107,5 @@
 - 发布页主按钮「AI 帮我写」弹出与润色同风格的草稿；每块可「换一版」，「全部采用」写回简介、亮点和三个套餐，发布前仍可改
 - 缺任一行程时不提交，并说明缺的是哪一个套餐。详情页只在套餐自己有 `itinerary` 时展开时间线；林小满这类旧页没有开关
 - `_quarter_hour(7.5)` 现在是 15，不再先截成整数再加 7。三小时五站的示例时间改为 10:00 / 10:45 / 11:15 / 12:00 / 12:30
-- `python3 -m unittest discover -s tests -v`：90 项通过，12 项因未安装 PyTorch 跳过。README 未改
+- `python3 -m unittest discover -s tests -v`：91 项通过，12 项因未安装 PyTorch 跳过。README 未改
+- Windows CI 用 cp1252 读 Node 的 UTF-8 输出，`stdout` 变成空。校验改走临时 `.mjs`，并以 `encoding='utf-8'` 读取；没有 node、退出码非 0 或 stdout 为空时给出 AssertionError。workflow 用 `actions/setup-node` 安装 Node 22
