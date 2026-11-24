@@ -10,7 +10,22 @@ from pathlib import Path
 from statistics import mean
 
 from train_matching import ROOT, DATA_SEED, train, partition, evaluate
-from optimize_matching import load
+
+
+def load(path):
+    import torch
+    from matching_model import MatcherEnsemble, TinyBilateralMatcher
+    checkpoint = torch.load(path, map_location='cpu', weights_only=True)
+    if checkpoint.get('kind') == 'ensemble':
+        members = []
+        for state in checkpoint['members']:
+            member = TinyBilateralMatcher(len(checkpoint['vocab']) + 2, **state['config'])
+            member.load_state_dict(state['weights'])
+            members.append(member)
+        return checkpoint, MatcherEnsemble(members)
+    model = TinyBilateralMatcher(len(checkpoint['vocab']) + 2, **checkpoint.get('config', {}))
+    model.load_state_dict(checkpoint['weights'])
+    return checkpoint, model
 
 
 def run(output, epochs=180, device='cpu'):
@@ -48,13 +63,17 @@ def run(output, epochs=180, device='cpu'):
     # All model/configuration choices are frozen before building confirmation.
     confirmation = partition('confirmation', DATA_SEED, 64, 48, vocab=selected['vocab'])
     selected_metrics = evaluate(selected['model'], confirmation)
-    old_checkpoint, original = load(ROOT / 'server' / 'models' / 'matching_v1.pt')
-    old_confirmation = partition('confirmation', DATA_SEED, 64, 48, vocab=old_checkpoint['vocab'])
-    original_metrics = evaluate(original, old_confirmation)
     training = partition('train', DATA_SEED, 96, 72)
     truth = confirmation['targets'].tolist()
     baseline = score_metrics([training['targets'].mean(0).tolist()] * len(truth), truth, confirmation['trips'], confirmation['guides'])
     oracle = score_metrics(truth, truth, confirmation['trips'], confirmation['guides'])
+    baseline_path = ROOT / 'server' / 'models' / 'matching.pt'
+    if baseline_path.exists():
+        old_checkpoint, original = load(baseline_path)
+        old_confirmation = partition('confirmation', DATA_SEED, 64, 48, vocab=old_checkpoint['vocab'])
+        original_metrics = evaluate(original, old_confirmation)
+    else:
+        original_metrics = baseline
     seed_metrics = [evaluate(member, confirmation) for member in selected['model'].members]
     promoted = (all(selected_metrics['eligibleMAE'][key] < original_metrics['eligibleMAE'][key] for key in ('traveler', 'guide')) and
                 all(selected_metrics['ndcg5'][key] >= original_metrics['ndcg5'][key] for key in ('mutualTraveler', 'mutualGuide')))
