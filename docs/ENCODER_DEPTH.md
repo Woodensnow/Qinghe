@@ -38,7 +38,7 @@
 | 7 | 72 | 47 |
 | 101 | 103 | 195 |
 
-![三个种子各训练 500 轮的损失对照](../训练图表/Encoder一层与两层_500轮损失对照.png)
+![三个种子各训练 500 轮的损失对照](./encoder_depth_comparison.png)
 
 图中展示关闭 dropout 后计算的训练与验证合格候选 MSE，纵轴为对数刻度；不是包含排序项的训练总损失。每个验证曲线上的圆点是该成员保存权重的轮次。
 
@@ -49,7 +49,7 @@
 - 两层第 500 轮权重集成：`output/matching_500_encoder2/ensemble_epoch500.pt`。
 - 各成员权重与完整 500 轮记录：同目录下 `member_42`、`member_7`、`member_101` 的 `.pt` / `.json`。
 - 对照指标：`output/matching_500_encoder2/depth_comparison.json`。
-- PNG / SVG 图：`训练图表/Encoder一层与两层_500轮损失对照.*`。
+- 对照图：`docs/encoder_depth_comparison.png`。
 
 在项目根目录使用现有虚拟环境：
 
