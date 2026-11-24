@@ -18,7 +18,7 @@ class PackageTests(unittest.TestCase):
         with tempfile.TemporaryDirectory(dir=scratch) as directory:
             project = Path(directory) / 'project'
             project.mkdir()
-            for name in ('main.py', 'start.py', 'start.ps1', 'start.bat', 'start.sh', 'stop.sh', 'README.md', 'CREDITS.md', 'pyproject.toml', 'requirements-matching.txt', '.gitignore'):
+            for name in ('main.py', 'README.md', 'CREDITS.md', 'pyproject.toml', 'requirements-matching.txt', '.gitignore'):
                 shutil.copy2(ROOT / name, project)
             for folder in ('server', 'tests', 'docs', 'tools', '.github'):
                 shutil.copytree(ROOT / folder, project / folder, ignore=shutil.ignore_patterns('data.json', '*.tmp', '*.pid', '__pycache__'))

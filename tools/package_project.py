@@ -23,7 +23,7 @@ def main():
             relative = path.relative_to(ROOT)
             if path.is_file() and not path.is_symlink() and not excluded_parts.intersection(relative.parts) and path.name not in {'data.json', 'data.json.tmp', 'server.pid'} and not path.name.endswith('.local.json') and not path.name.startswith('.env') and path.suffix not in {'.pyc', '.pyo', '.log'}:
                 included.append(path)
-    included += [ROOT / name for name in ('main.py', 'start.py', 'start.ps1', 'start.bat', 'start.sh', 'stop.sh', 'README.md', 'CREDITS.md', 'pyproject.toml', 'requirements-matching.txt', '.gitignore')]
+    included += [ROOT / name for name in ('main.py', 'README.md', 'CREDITS.md', 'pyproject.toml', 'requirements-matching.txt', '.gitignore')]
     with ZipFile(archive, 'w', ZIP_DEFLATED) as bundle:
         for path in sorted(included):
             bundle.write(path, path.relative_to(ROOT).as_posix())
