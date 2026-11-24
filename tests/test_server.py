@@ -201,12 +201,11 @@ class ApiTests(ApiFixture):
         for pattern in ('*.py', 'catalog.json', 'seed-data.json'):
             for source in store.ROOT.glob(pattern):
                 shutil.copy2(source, backend)
-        shutil.copy2(store.ROOT.parent / 'start.py', project)
         shutil.copy2(store.ROOT.parent / 'main.py', project)
         uploads = project / 'public' / 'uploads'
         uploads.mkdir(parents=True)
         (uploads / 'test.jpg').write_bytes(b'test')
-        command = [sys.executable, str(project / 'start.py')]
+        command = [sys.executable, str(project / 'main.py')]
         result = subprocess.run(command + ['--reset'], capture_output=True)
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertFalse((uploads / 'test.jpg').exists())
@@ -214,7 +213,7 @@ class ApiTests(ApiFixture):
         with socket.socket() as sock:
             sock.bind(('127.0.0.1', 0))
             port = sock.getsockname()[1]
-        process = subprocess.Popen(command, env={**os.environ, 'PORT': str(port), 'HOST': '127.0.0.1', 'PYTHONIOENCODING': 'utf-8'}, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        process = subprocess.Popen(command + ['--serve'], env={**os.environ, 'PORT': str(port), 'HOST': '127.0.0.1', 'PYTHONIOENCODING': 'utf-8'}, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         try:
             for attempt in range(50):
                 if (backend / 'server.pid').exists():

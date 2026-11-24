@@ -48,7 +48,7 @@ python -m venv .venv
 
 训练入口现在支持 `--encoder-layers 2`。一层与两层各三个种子、每个 500 轮的实测见 [Encoder 深度对照](ENCODER_DEPTH.md)，两层权重保存在实验目录，网站继续使用原有一层模型。
 
-macOS / Linux 将解释器路径改为 `.venv/bin/python`。如果系统已装 GPU 版 PyTorch，也可使用兼容版本；本项目已在 CPU 上验证。Windows `start.bat` / `start.ps1` 优先使用项目 `.venv`，`PYTHON_BIN` 可显式覆盖。模型权重和报告保存在 `server/models/matching.pt` 与 `matching.json`，训练脚本不会读取现有用户账号、聊天或预约数据。通过网页导航“**双边匹配**”进入 `/matching`。
+macOS / Linux 将解释器路径改为 `.venv/bin/python`。如果系统已装 GPU 版 PyTorch，也可使用兼容版本；本项目已在 CPU 上验证。直接运行 `.venv/bin/python main.py --serve`（Windows 下用 `.\.venv\Scripts\python.exe main.py --serve`）启动网页服务。模型权重和报告保存在 `server/models/matching.pt` 与 `matching.json`，训练脚本不会读取现有用户账号、聊天或预约数据。通过网页导航“**双边匹配**”进入 `/matching`。
 
 首次演示建议开两个浏览器会话：地陪发布服务、填写偏好；旅人填写同城需求并匹配。预置服务缺少偏好时不会自动编造偏好，请使用自己填写好的服务。
 
