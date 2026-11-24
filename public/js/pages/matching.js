@@ -3,12 +3,80 @@ import { session } from '../session.js?v=1.7.0';
 import { openAuthModal } from '../components/auth-modal.js?v=1.7.0';
 import { appState } from '../state.js?v=1.7.0';
 import { navigate } from '../router.js?v=1.7.0';
-import { escapeHTML as e, cityOptionsHTML, localDateISO, maxTripDateISO, setPageTitle, toast } from '../ui.js?v=1.7.0';
+import { escapeHTML as e, cityOptionsHTML, isRealDateISO, localDateISO, maxTripDateISO, setPageTitle, toast } from '../ui.js?v=1.7.0';
 
 const checks = (name, values, chosen = []) => `<div class="match-checks">${values.map(v => `<label><input type="checkbox" name="${name}" value="${e(v)}" ${chosen.includes(v) ? 'checked' : ''}> ${e(v)}</label>`).join('')}</div>`;
 const field = (label, content) => `<label class="field"><span class="field-label">${label}</span>${content}</label>`;
 const picks = (form, name) => [...form.querySelectorAll(`[name="${name}"]:checked`)].map(input => input.value);
 const bookingLink = (match, trip) => `/guides/${encodeURIComponent(match.guideId)}?${new URLSearchParams({ package: match.offer.packageId, date: trip.date, time: trip.time, people: trip.people })}`;
+
+const parseISO = iso => String(iso).split('-').map(Number);
+const formatISO = (year, month, day) => `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+
+export function clampDateISO(value, minISO, maxISO) {
+  if (!isRealDateISO(value) || value < minISO) return minISO;
+  if (value > maxISO) return maxISO;
+  return value;
+}
+
+export function dateOptions(year, month, day, minISO, maxISO) {
+  const [minY, minM, minD] = parseISO(minISO);
+  const [maxY, maxM, maxD] = parseISO(maxISO);
+  const clampedY = Math.min(Math.max(year, minY), maxY);
+  const years = Array.from({ length: maxY - minY + 1 }, (_, i) => minY + i);
+  const startM = clampedY === minY ? minM : 1;
+  const endM = clampedY === maxY ? maxM : 12;
+  const clampedM = Math.min(Math.max(month, startM), endM);
+  const months = Array.from({ length: endM - startM + 1 }, (_, i) => startM + i);
+  const daysInMonth = new Date(clampedY, clampedM, 0).getDate();
+  const startD = (clampedY === minY && clampedM === minM) ? minD : 1;
+  const endD = (clampedY === maxY && clampedM === maxM) ? maxD : daysInMonth;
+  const clampedD = Math.min(Math.max(day, startD), endD);
+  const days = Array.from({ length: endD - startD + 1 }, (_, i) => startD + i);
+  return {
+    year: clampedY,
+    month: clampedM,
+    day: clampedD,
+    iso: formatISO(clampedY, clampedM, clampedD),
+    years,
+    months,
+    days,
+  };
+}
+
+function datePickerField(label, value, minISO, maxISO) {
+  const [y, m, d] = parseISO(clampDateISO(value, minISO, maxISO));
+  const init = dateOptions(y, m, d, minISO, maxISO);
+  return `<div class="field" role="group" aria-labelledby="match-date-label">
+    <span class="field-label" id="match-date-label">${label}</span>
+    <div class="date-select-group" data-date-group data-min="${minISO}" data-max="${maxISO}">
+      <select data-date-part="year" aria-label="年份">${init.years.map(v => `<option value="${v}"${v === init.year ? ' selected' : ''}>${v} 年</option>`).join('')}</select>
+      <select data-date-part="month" aria-label="月份">${init.months.map(v => `<option value="${v}"${v === init.month ? ' selected' : ''}>${v} 月</option>`).join('')}</select>
+      <select data-date-part="day" aria-label="日期">${init.days.map(v => `<option value="${v}"${v === init.day ? ' selected' : ''}>${v} 日</option>`).join('')}</select>
+    </div>
+    <input type="hidden" name="date" value="${init.iso}">
+  </div>`;
+}
+
+function bindDatePicker(container) {
+  const group = container.querySelector('[data-date-group]');
+  if (!group) return;
+  const yearSel = group.querySelector('[data-date-part="year"]');
+  const monthSel = group.querySelector('[data-date-part="month"]');
+  const daySel = group.querySelector('[data-date-part="day"]');
+  const hiddenInput = group.parentElement.querySelector('input[name="date"]');
+  const { min, max } = group.dataset;
+  const sync = () => {
+    const next = dateOptions(Number(yearSel.value), Number(monthSel.value), Number(daySel.value), min, max);
+    monthSel.innerHTML = next.months.map(m => `<option value="${m}"${m === next.month ? ' selected' : ''}>${m} 月</option>`).join('');
+    daySel.innerHTML = next.days.map(d => `<option value="${d}"${d === next.day ? ' selected' : ''}>${d} 日</option>`).join('');
+    yearSel.value = String(next.year);
+    monthSel.value = String(next.month);
+    daySel.value = String(next.day);
+    hiddenInput.value = next.iso;
+  };
+  [yearSel, monthSel, daySel].forEach(sel => sel.addEventListener('change', sync));
+}
 
 export async function renderMatching(root) {
   setPageTitle('双边匹配');
@@ -39,7 +107,7 @@ export async function renderMatching(root) {
           <h2>这次想怎么玩？</h2>
           <div class="form-grid form-grid--two">
             ${field('目的地', `<select name="city" required>${cityOptionsHTML(catalog.cityGroups, t.city || '', { allLabel: '选择城市' })}</select>`)}
-            ${field('日期', `<input name="date" type="date" min="${localDateISO()}" max="${maxTripDateISO()}" value="${e(t.date || localDateISO())}" required>`)}
+            ${datePickerField('日期', t.date || localDateISO(), localDateISO(), maxTripDateISO())}
             ${field('开始时间', `<select name="time">${['09:00','10:00','11:00','13:00','14:00','15:00','16:00','17:00','18:00','19:00'].map(v => `<option ${v === (t.time || '10:00') ? 'selected' : ''}>${v}</option>`).join('')}</select>`)}
             ${field('套餐时长', `<select name="hours">${[3,4,8].map(v => `<option value="${v}" ${v === (t.hours || 4) ? 'selected' : ''}>${v} 小时</option>`).join('')}</select>`)}
             ${field('同行人数', `<input name="people" type="number" min="1" max="8" value="${t.people || 2}" required>`)}
@@ -64,6 +132,7 @@ export async function renderMatching(root) {
       </div>
       <div class="match-results" data-matches aria-live="polite"></div>
     </section>`;
+    bindDatePicker(root);
     const results = root.querySelector('[data-matches]');
     let mode = 'traveler';
     const showResults = async (side, guideId = '') => {

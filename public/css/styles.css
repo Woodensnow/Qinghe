@@ -4154,17 +4154,28 @@ a:focus:not(:focus-visible) {
   width: 100%;
   border: 1px solid var(--line);
   border-radius: 11px;
-  background: var(--paper);
+  background-color: var(--paper);
   color: var(--ink);
   font-size: 12px;
   outline: none;
-  transition: border-color 0.2s, background 0.2s, box-shadow 0.2s;
+  transition: border-color 0.2s, background-color 0.2s, box-shadow 0.2s;
 }
 
 .input-wrap input,
 .input-wrap select {
   height: 45px;
   padding: 0 13px;
+}
+
+.input-wrap select {
+  -webkit-appearance: none;
+  appearance: none;
+  padding-right: 36px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23667a6e' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 13px center;
+  background-size: 15px 15px;
+  cursor: pointer;
 }
 
 .input-wrap textarea {
@@ -4183,7 +4194,7 @@ a:focus:not(:focus-visible) {
 .input-wrap select:focus,
 .input-wrap textarea:focus {
   border-color: var(--green-400);
-  background: white;
+  background-color: white;
   box-shadow: 0 0 0 3px rgba(94, 165, 131, 0.1);
 }
 
@@ -4196,7 +4207,7 @@ a:focus:not(:focus-visible) {
 .input-wrap select.is-invalid,
 .input-wrap textarea.is-invalid {
   border-color: #d7958d;
-  background: #fffafa;
+  background-color: #fffafa;
 }
 
 .input-icon {
@@ -7968,11 +7979,94 @@ a:focus:not(:focus-visible) {
 .match-tabs, .match-actions { display: flex; gap: 12px; flex-wrap: wrap; margin: 24px 0; }
 .match-form { background: var(--white); border: 1px solid var(--line); border-radius: 20px; padding: clamp(20px, 4vw, 36px); margin: 20px 0; }
 .match-form h2 { margin-bottom: 22px; }
+.match-form .form-grid { gap: 16px 20px; margin-bottom: 18px; }
+.match-form .form-grid .field { margin-bottom: 0; min-width: 0; }
+.match-form .field { gap: 7px; }
+.match-form .field-label { font-size: 12.5px; font-weight: 600; color: var(--ink-2); }
 .match-form fieldset { border: 0; padding: 0; margin: 24px 0; }
 .match-form legend { font-weight: 600; margin-bottom: 12px; }
 .match-checks { display: flex; flex-wrap: wrap; gap: 10px; }
-.match-checks label { padding: 9px 13px; border: 1px solid var(--line); border-radius: 10px; cursor: pointer; }
-.match-form input:not([type="checkbox"]), .match-form select, .match-form textarea { width: 100%; padding: 12px; border: 1px solid var(--line-strong); border-radius: 10px; background: var(--white); color: var(--ink); }
+.match-checks label { display: inline-flex; align-items: center; gap: 6px; padding: 9px 14px; border: 1px solid var(--line-strong); border-radius: 10px; background-color: var(--paper); color: var(--ink-2); font-size: 13.5px; cursor: pointer; transition: border-color 0.2s, background-color 0.2s, color 0.2s; }
+.match-checks label:hover { border-color: var(--green-400); }
+.match-checks label:has(input:checked) { border-color: var(--green-600); background-color: var(--green-50); color: var(--green-900); }
+.match-form input:not([type="checkbox"]),
+.match-form select,
+.match-form textarea {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  border: 1px solid var(--line-strong);
+  border-radius: 11px;
+  background-color: var(--paper);
+  color: var(--ink);
+  font-size: 14px;
+  line-height: 1.4;
+  outline: none;
+  transition: border-color 0.2s, background-color 0.2s, box-shadow 0.2s;
+}
+.match-form input:not([type="checkbox"]),
+.match-form select {
+  height: 46px;
+  padding: 0 14px;
+}
+.match-form select {
+  -webkit-appearance: none;
+  appearance: none;
+  padding-right: 38px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23667a6e' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 14px center;
+  background-size: 15px 15px;
+  cursor: pointer;
+}
+.match-form .date-select-group {
+  display: grid;
+  grid-template-columns: 1.25fr 1fr 1fr;
+  gap: 8px;
+}
+.match-form .date-select-group select {
+  padding: 0 30px 0 12px;
+  background-position: right 10px center;
+  font-variant-numeric: tabular-nums;
+}
+.match-form input[type="date"] {
+  -webkit-appearance: none;
+  appearance: none;
+  color-scheme: light;
+  text-align: left;
+}
+.match-form input[type="date"]::-webkit-date-and-time-value {
+  text-align: left;
+  min-height: 1.4em;
+}
+.match-form input[type="date"]::-webkit-calendar-picker-indicator {
+  opacity: 0.55;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+.match-form input[type="date"]::-webkit-calendar-picker-indicator:hover { opacity: 0.9; }
+.match-form input[type="number"] { -moz-appearance: textfield; appearance: textfield; }
+.match-form input[type="number"]::-webkit-inner-spin-button,
+.match-form input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+.match-form textarea {
+  height: auto;
+  min-height: 104px;
+  padding: 12px 14px;
+  line-height: 1.65;
+  resize: vertical;
+}
+.match-form input:not([type="checkbox"]):hover,
+.match-form select:hover,
+.match-form textarea:hover { border-color: var(--green-400); }
+.match-form input:not([type="checkbox"]):focus,
+.match-form select:focus,
+.match-form textarea:focus {
+  border-color: var(--green-500);
+  background-color: var(--white);
+  box-shadow: 0 0 0 3px rgba(94, 165, 131, 0.14);
+}
+.match-form input::placeholder,
+.match-form textarea::placeholder { color: var(--muted-2); }
 .match-form input[type="checkbox"] { accent-color: var(--green-700); }
 .match-consent { display: block; line-height: 1.8; margin-top: 24px; }
 .match-result { display: grid; grid-template-columns: 1fr 240px; gap: 24px; padding: 28px; margin: 20px 0; border: 1px solid var(--line); border-radius: 20px; background: var(--white); }
@@ -7983,7 +8077,7 @@ a:focus:not(:focus-visible) {
 .match-score > strong { font-size: 46px; line-height: 1; color: var(--green-700); }
 .match-score small { color: var(--muted); margin-bottom: 10px; }
 .matching-page [hidden] { display: none !important; }
-@media (max-width: 680px) { .match-result { grid-template-columns: 1fr; } .match-score { border-top: 1px solid var(--line); padding-top: 20px; } }
+@media (max-width: 680px) { .match-form .form-grid--two { grid-template-columns: 1fr; gap: 16px; } .match-result { grid-template-columns: 1fr; } .match-score { border-top: 1px solid var(--line); padding-top: 20px; } }
 
 /* =========================================================
    AI 帮我写 · draft editor and package timelines
